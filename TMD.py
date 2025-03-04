@@ -1,11 +1,12 @@
-import os
-import time
+import os, math, time
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def take_full_page_screenshot(browser, save_path):
     # تغییر سطح zoom صفحه به 50% برای کوچک‌تر شدن کل محتوا در ویوپورت
@@ -52,6 +53,61 @@ def click_inbounds():
     print("پس از کلیک روی Inbounds، آدرس فعلی پنل:", browser.current_url)
 
 # تنظیمات مرورگر و راه‌اندازی آن
+
+def extend_client_subscription(client_name, extension_days=30):
+    print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
+    try:
+        search_input = browser.find_element(By.XPATH, "//input[@placeholder='Search']")
+    except Exception as e:
+        print("خطا در یافتن فیلد جستجو:", e)
+        return
+
+    search_input.clear()
+    search_input.send_keys(client_name)
+    search_input.send_keys(Keys.RETURN)
+    print(f"کلاینت '{client_name}' ارسال شد. در حال جستجو...")
+    time.sleep(3)
+
+    try:
+        wait = WebDriverWait(browser, 10)
+        client_row = wait.until(
+            EC.presence_of_element_located((By.XPATH, f"//tr[td[contains(text(), '{client_name}')]]"))
+        )
+        print("ردیف کلاینت پیدا شد.")
+    except Exception as e:
+        print("کلاینت یافت نشد:", e)
+        # گرفتن اسکرین‌شات از نتایج جستجو جهت بررسی
+        screenshot_path = os.path.join("/root/Screen/", "search_result.png")
+        browser.save_screenshot(screenshot_path)
+        print("اسکرین‌شات نتایج جستجو ذخیره شد:", screenshot_path)
+        return
+
+    try:
+        extend_button = client_row.find_element(By.XPATH, ".//button[contains(text(), 'Extend')]")
+        print("دکمه تمدید اشتراک پیدا شد. در حال کلیک روی آن...")
+        extend_button.click()
+    except Exception as e:
+        print("خطا در یافتن یا کلیک روی دکمه تمدید اشتراک:", e)
+        return
+
+    time.sleep(2)
+
+    try:
+        days_input = browser.find_element(By.XPATH, "//input[@name='extensionDays']")
+        days_input.clear()
+        days_input.send_keys(str(extension_days))
+        print(f"تعداد روز {extension_days} وارد شد.")
+
+        confirm_button = browser.find_element(By.XPATH, "//button[contains(text(), 'Confirm')]")
+        confirm_button.click()
+        print("تمدید اشتراک تایید و انجام شد.")
+    except Exception as e:
+        print("خطا در پردازش فرم تمدید:", e)
+
+    time.sleep(3)
+
+
+# تنظیمات مرورگر و راه‌اندازی
 print("در حال راه‌اندازی مرورگر...")
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
@@ -61,15 +117,16 @@ service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
 
-# ورود به پنل و کلیک روی دکمه Inbounds
+# ورود به پنل و کلیک روی Inbounds
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 
-# گرفتن اسکرین‌شات کامل (تغییر اندازه به 1080x720)
+# (اختیاری) گرفتن اسکرین‌شات کامل صفحه
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
-print("در حال گرفتن اسکرین‌شات کامل صفحه Inbounds...")
 take_full_page_screenshot(browser, full_screenshot_path)
 
+# فراخوانی تابع تمدید برای کلاینت "FM"
+extend_client_subscription("FM", 30)
+
 browser.quit()
-print("مرورگر بسته شد. عملیات تکمیل شد.")
