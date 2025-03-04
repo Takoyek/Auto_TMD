@@ -6,9 +6,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 
-# تنظیمات مرورگر و وب‌درایور
+# تنظیمات مرورگر و WebDriver
 options = webdriver.ChromeOptions()
-options.add_argument('--headless')  # اجرای بدون نمایش رابط کاربری
+options.add_argument('--headless')  # اجرای بدون نمایش مرورگر
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 service = Service(ChromeDriverManager().install())
@@ -31,12 +31,10 @@ def login_to_panel(username, password):
         password_field.send_keys(Keys.RETURN)
         time.sleep(5)
         
-        # بررسی آدرس فعلی پس از ورود
         current_url = browser.current_url
         print("آدرس فعلی پس از ورود:", current_url)
     except Exception as e:
         print("خطا در ورود به پنل:", e)
-        # ذخیره صفحه HTML جهت بررسی
         page_source = browser.page_source
         with open("page_source.html", "w", encoding='utf-8') as file:
             file.write(page_source)
@@ -44,11 +42,9 @@ def login_to_panel(username, password):
 
 def click_inbounds():
     try:
-        # اگر هنوز در صفحه اصلی پنل هستیم، باید روی دکمه Inbounds کلیک کنیم
         time.sleep(2)
-        # پیدا کردن دکمه Inbounds با استفاده از تگ <b>
+        # پیدا کردن دکمه Inbounds با تگ <b> و کلیک روی عنصر والد
         inbound_element = browser.find_element(By.XPATH, "//b[text()='Inbounds']")
-        # اگر نیاز است، ممکن است لازم باشد عنصر والد (مانند دکمه) را کلیک کنیم:
         try:
             inbound_button = inbound_element.find_element(By.XPATH, "./..")
             inbound_button.click()
@@ -62,14 +58,25 @@ def click_inbounds():
             print("هدایت به صفحه Inbounds انجام شد.")
         else:
             print("هدایت به صفحه Inbounds انجام نشد.")
+        
+        # گرفتن اسکرین‌شات از صفحه Inbounds
+        screenshot_path = os.path.join("/root/Screen/", "inbounds_page.png")
+        browser.save_screenshot(screenshot_path)
+        print(f"اسکرین‌شات صفحه Inbounds گرفته شد: {screenshot_path}")
+        
     except Exception as e:
         print("خطا در کلیک روی Inbounds:", e)
         screenshot_path = os.path.join("/root/Screen/", "inbounds_error.png")
         browser.save_screenshot(screenshot_path)
         print("اسکرین‌شات خطا در مسیر:", screenshot_path)
 
+def extend_subscription(user):
+    # ادامه کد مربوط به تمدید اشتراک در آینده
+    pass
+
 # اجرای توابع
 login_to_panel('msi', 'msi')
 click_inbounds()
+extend_subscription('example_user')
 
 browser.quit()
