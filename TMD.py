@@ -119,10 +119,6 @@ def edit_total_flow_value(new_value):
     print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
 
 
-
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-
 def toggle_start_after_first_use_and_capture():
     try:
         # ارسال یک بار کلید TAB برای رفتن به دکمه "Start After First Use"
@@ -174,9 +170,6 @@ def edit_client_window_and_capture():
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
 
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-
 def update_duration_field_and_capture(new_value="21"):
     try:
         print("در حال ارسال یک بار کلید TAB جهت انتقال به فیلد 'Duration'...")
@@ -208,10 +201,6 @@ def update_duration_field_and_capture(new_value="21"):
         print("خطا در به‌روزرسانی فیلد 'Duration':", e)
 
 
-
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-
 def save_changes_and_capture():
     try:
         print("در حال ارسال 3 بار کلید TAB جهت انتقال به دکمه 'Save Changes'...")
@@ -242,7 +231,6 @@ def save_changes_and_capture():
         print("خطا در عملیات 'Save Changes':", e)
 
 
-
 # ------------------ Main Program ------------------
 print("در حال راه‌اندازی مرورگر...")
 options = webdriver.ChromeOptions()
@@ -252,7 +240,6 @@ options.add_argument('--disable-dev-shm-usage')
 service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
-
 
 login_to_panel('msi', 'msi')
 click_inbounds()
@@ -265,15 +252,10 @@ print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
 toggle_start_after_first_use_and_capture()
-
 print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
 update_duration_field_and_capture("21")
-
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله ذخیره تغییرات (Save Changes) می‌رویم.")
 save_changes_and_capture()
-
-
-print("تا اینجا عملیات تغییر وضعیت 'Start After First Use' و گرفتن اسکرین‌شات جدید به پایان رسید. منتظر دستور بعدی شما هستیم.")
+print("عملیات تمدید اشتراک کاربر با موفقیت انجام شد.")
 browser.quit()
 print("مرورگر بسته شد.")
-

@@ -119,10 +119,6 @@ def edit_total_flow_value(new_value):
     print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
 
 
-
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-
 def toggle_start_after_first_use_and_capture():
     try:
         # ارسال یک بار کلید TAB برای رفتن به دکمه "Start After First Use"
@@ -174,9 +170,6 @@ def edit_client_window_and_capture():
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
 
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-
 def update_duration_field_and_capture(new_value="21"):
     try:
         print("در حال ارسال یک بار کلید TAB جهت انتقال به فیلد 'Duration'...")
@@ -208,6 +201,36 @@ def update_duration_field_and_capture(new_value="21"):
         print("خطا در به‌روزرسانی فیلد 'Duration':", e)
 
 
+def save_changes_and_capture():
+    try:
+        print("در حال ارسال 3 بار کلید TAB جهت انتقال به دکمه 'Save Changes'...")
+        actions = ActionChains(browser)
+        for _ in range(3):
+            actions.send_keys(Keys.TAB)
+        actions.perform()
+        time.sleep(1)  # صبر برای انتقال فوکوس به دکمه 'Save Changes'
+        
+        # دریافت عنصر فعال پس از ارسال TAB
+        active_elem = browser.switch_to.active_element
+        print("عنصر فعال (که باید دکمه 'Save Changes' باشد) یافته شد. در حال کلیک روی آن...")
+        
+        # کلیک روی دکمه Save Changes (می‌توانید از active_elem.click() استفاده کنید یا از دستور JavaScript برای اطمینان استفاده نمایید)
+        try:
+            active_elem.click()
+        except Exception:
+            browser.execute_script("arguments[0].click();", active_elem)
+        print("کلیک روی دکمه 'Save Changes' انجام شد.")
+        time.sleep(3)  # صبر جهت بارگذاری کامل پس از ذخیره تغییرات
+        
+        # گرفتن اسکرین‌شات از وضعیت نهایی
+        save_screenshot_path = os.path.join("/root/Screen/", "save_changes_result.png")
+        take_full_page_screenshot(browser, save_screenshot_path)
+        print("اسکرین‌شات نتیجه ذخیره تغییرات در مسیر ذخیره شد:", save_screenshot_path)
+        
+    except Exception as e:
+        print("خطا در عملیات 'Save Changes':", e)
+
+
 # ------------------ Main Program ------------------
 print("در حال راه‌اندازی مرورگر...")
 options = webdriver.ChromeOptions()
@@ -217,7 +240,6 @@ options.add_argument('--disable-dev-shm-usage')
 service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
-
 
 login_to_panel('msi', 'msi')
 click_inbounds()
@@ -230,11 +252,10 @@ print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
 toggle_start_after_first_use_and_capture()
-
 print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
 update_duration_field_and_capture("21")
-
-print("تا اینجا عملیات تغییر وضعیت 'Start After First Use' و گرفتن اسکرین‌شات جدید به پایان رسید. منتظر دستور بعدی شما هستیم.")
+print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله ذخیره تغییرات (Save Changes) می‌رویم.")
+save_changes_and_capture()
+print("عملیات تمدید اشتراک کاربر با موفقیت انجام شد.")
 browser.quit()
 print("مرورگر بسته شد.")
-
