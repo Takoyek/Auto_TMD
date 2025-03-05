@@ -8,17 +8,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
     browser.execute_script("document.body.style.zoom='0.5'")
     time.sleep(2)
-    
     print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
     print("اسکرین‌شات صفحه ذخیره شد:", save_path)
-    
     print("در حال تغییر اندازه تصویر نهایی به 1080x720...")
     final_image = Image.open(save_path)
     final_image = final_image.resize((1080, 720), Image.LANCZOS)
@@ -84,30 +83,129 @@ def search_client_and_capture(client_name):
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 def click_edit_client_button_and_capture():
     try:
         print("در حال یافتن دکمه 'Edit Client' با استفاده از CSS Selector...")
         wait = WebDriverWait(browser, 10)
-        # پیدا کردن عنصر Edit Client بر اساس کلاس‌های داده‌شده
         edit_elem = wait.until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
-            )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit"))
         )
         print("عنصر دکمه 'Edit Client' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
         browser.execute_script("arguments[0].click();", edit_elem)
         print("کلیک روی دکمه 'Edit Client' انجام شد.")
-        time.sleep(5)  # صبر جهت بارگذاری صفحه پس از کلیک
-        
+        time.sleep(5)
         result_screenshot_path = os.path.join("/root/Screen/", "edit_client_result.png")
         take_full_page_screenshot(browser, result_screenshot_path)
         print("اسکرین‌شات نتیجه 'Edit Client' در مسیر ذخیره شد:", result_screenshot_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
 
+# توابع برای استفاده از ارسال کلید TAB جهت دستیابی به فیلد "Total Flow"
+def go_to_total_flow_field_by_tab(tab_count=6):
+    print(f"در حال ارسال {tab_count} بار کلید TAB جهت رسیدن به فیلد 'Total Flow'...")
+    actions = ActionChains(browser)
+    for _ in range(tab_count):
+        actions.send_keys(Keys.TAB)
+    actions.perform()
+    time.sleep(1)
+
+def edit_total_flow_value(new_value):
+    go_to_total_flow_field_by_tab(6)  # انتقال فوکوس به فیلد "Total Flow" با ارسال ۶ بار TAB
+    active = browser.switch_to.active_element
+    # پاکسازی فیلد با استفاده از دستور JavaScript
+    browser.execute_script("arguments[0].value='';", active)
+    # ارسال مقدار جدید به فیلد (فقط یک بار)
+    active.send_keys(new_value)
+    print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+
+
+
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
+def toggle_start_after_first_use_and_capture():
+    try:
+        # ارسال یک بار کلید TAB برای رفتن به دکمه "Start After First Use"
+        print("در حال ارسال 1 بار کلید TAB جهت رسیدن به دکمه 'Start After First Use'...")
+        actions = ActionChains(browser)
+        actions.send_keys(Keys.TAB)
+        actions.perform()
+        time.sleep(1)  # صبر برای انتقال فوکوس
+        
+        # حالا کلید SPACE را ارسال می‌کنیم تا دکمه تغییر حالت دهد.
+        print("در حال فشار دادن کلید SPACE برای فعال‌سازی 'Start After First Use'...")
+        actions = ActionChains(browser)
+        actions.send_keys(Keys.SPACE)
+        actions.perform()
+        time.sleep(2)  # صبر برای اعمال تغییر حالت
+        
+        # گرفتن اسکرین‌شات جدید از وضعیت
+        start_after_screenshot_path = os.path.join("/root/Screen/", "start_after_result.png")
+        take_full_page_screenshot(browser, start_after_screenshot_path)
+        print("اسکرین‌شات جدید از وضعیت 'Start After First Use' در مسیر ذخیره شد:", start_after_screenshot_path)
+        
+    except Exception as e:
+        print("خطا در عملیات تغییر وضعیت 'Start After First Use' یا گرفتن اسکرین‌شات:", e)
+
+
+def edit_client_window_and_capture():
+    try:
+        print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
+        time.sleep(3)
+        
+        # گرفتن اسکرین‌شات قبل از تغییر در پنجره Edit Client
+        before_path = os.path.join("/root/Screen/", "edit_client_before.png")
+        take_full_page_screenshot(browser, before_path)
+        print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_path)
+        
+        # فقط تغییر در فیلد "Total Flow"
+        print("در حال تغییر مقدار 'Total Flow' با استفاده از کلید TAB...")
+        edit_total_flow_value("7")
+        
+        # صبر برای اعمال تغییرات
+        time.sleep(2)
+        
+        # گرفتن اسکرین‌شات بعد از تغییرات
+        after_path = os.path.join("/root/Screen/", "edit_client_after.png")
+        take_full_page_screenshot(browser, after_path)
+        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
+        
+    except Exception as e:
+        print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
+
+
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
+def update_duration_field_and_capture(new_value="21"):
+    try:
+        print("در حال ارسال یک بار کلید TAB جهت انتقال به فیلد 'Duration'...")
+        actions = ActionChains(browser)
+        actions.send_keys(Keys.TAB)
+        actions.perform()
+        time.sleep(1)  # صبر برای انتقال فوکوس
+        
+        # دریافت عنصری که در حال حاضر فوکوس دارد (که باید فیلد Duration باشد)
+        active_elem = browser.switch_to.active_element
+        print("عنصر فعال، که باید مربوط به فیلد 'Duration' باشد، یافته شد.")
+        
+        # پاک‌سازی مقدار فعلی فیلد 'Duration'
+        print("در حال پاک کردن مقدار فعلی در فیلد 'Duration'...")
+        browser.execute_script("arguments[0].value='';", active_elem)
+        time.sleep(0.5)
+        
+        # وارد کردن مقدار جدید
+        print("در حال وارد کردن مقدار جدید برای فیلد 'Duration'...")
+        active_elem.send_keys(new_value)
+        print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
+        
+        # گرفتن اسکرین‌شات از وضعیت جدید
+        duration_screenshot_path = os.path.join("/root/Screen/", "duration_updated.png")
+        take_full_page_screenshot(browser, duration_screenshot_path)
+        print("اسکرین‌شات وضعیت به‌روز شده فیلد 'Duration' در مسیر ذخیره شد:", duration_screenshot_path)
+        
+    except Exception as e:
+        print("خطا در به‌روزرسانی فیلد 'Duration':", e)
 
 
 # ------------------ Main Program ------------------
@@ -120,20 +218,23 @@ service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
 
-# اجرای مراحل اصلی:
+
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 expand_all_inbound_rows()
 search_client_and_capture("FM")
-# (اختیاری) گرفتن اسکرین‌شات از صفحه Inbounds پس از انجام عملیات
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
-print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله کلیک روی دکمه 'Edit Client' هستیم.")
-
+print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
+edit_client_window_and_capture()
+toggle_start_after_first_use_and_capture()
 
-print("تا اینجا عملیات کلیک روی دکمه 'Edit Client' و گرفتن اسکرین‌شات صفحه نهایی به پایان رسید. منتظر دستور بعدی شما هستیم.")
+print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
+update_duration_field_and_capture("21")
+
+print("تا اینجا عملیات تغییر وضعیت 'Start After First Use' و گرفتن اسکرین‌شات جدید به پایان رسید. منتظر دستور بعدی شما هستیم.")
 browser.quit()
 print("مرورگر بسته شد.")
 
