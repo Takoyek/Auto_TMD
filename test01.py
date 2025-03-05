@@ -112,12 +112,12 @@ def go_to_total_flow_field_by_tab(tab_count=6):
 def edit_total_flow_value(new_value):
     go_to_total_flow_field_by_tab(6)  # انتقال فوکوس به فیلد "Total Flow" با ارسال ۶ بار TAB
     active = browser.switch_to.active_element
-    # پاکسازی فیلد با انتخاب تمام متن و حذف آن
-    active.send_keys(Keys.CONTROL, "a")
-    active.send_keys(Keys.DELETE)
-    # ارسال مقدار جدید
+    # پاکسازی فیلد با استفاده از دستور JavaScript
+    browser.execute_script("arguments[0].value='';", active)
+    # ارسال مقدار جدید به فیلد (فقط یک بار)
     active.send_keys(new_value)
     print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+
 
 
 from selenium.webdriver.common.action_chains import ActionChains
@@ -148,7 +148,6 @@ def toggle_start_after_first_use_and_capture():
         print("خطا در عملیات تغییر وضعیت 'Start After First Use' یا گرفتن اسکرین‌شات:", e)
 
 
-
 def edit_client_window_and_capture():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
@@ -174,6 +173,41 @@ def edit_client_window_and_capture():
     except Exception as e:
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
+
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
+def update_duration_field_and_capture(new_value="21"):
+    try:
+        print("در حال ارسال یک بار کلید TAB جهت انتقال به فیلد 'Duration'...")
+        actions = ActionChains(browser)
+        actions.send_keys(Keys.TAB)
+        actions.perform()
+        time.sleep(1)  # صبر برای انتقال فوکوس
+        
+        # دریافت عنصری که در حال حاضر فوکوس دارد (که باید فیلد Duration باشد)
+        active_elem = browser.switch_to.active_element
+        print("عنصر فعال، که باید مربوط به فیلد 'Duration' باشد، یافته شد.")
+        
+        # پاک‌سازی مقدار فعلی فیلد 'Duration'
+        print("در حال پاک کردن مقدار فعلی در فیلد 'Duration'...")
+        browser.execute_script("arguments[0].value='';", active_elem)
+        time.sleep(0.5)
+        
+        # وارد کردن مقدار جدید
+        print("در حال وارد کردن مقدار جدید برای فیلد 'Duration'...")
+        active_elem.send_keys(new_value)
+        print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
+        
+        # گرفتن اسکرین‌شات از وضعیت جدید
+        duration_screenshot_path = os.path.join("/root/Screen/", "duration_updated.png")
+        take_full_page_screenshot(browser, duration_screenshot_path)
+        print("اسکرین‌شات وضعیت به‌روز شده فیلد 'Duration' در مسیر ذخیره شد:", duration_screenshot_path)
+        
+    except Exception as e:
+        print("خطا در به‌روزرسانی فیلد 'Duration':", e)
+
+
 # ------------------ Main Program ------------------
 print("در حال راه‌اندازی مرورگر...")
 options = webdriver.ChromeOptions()
@@ -184,7 +218,7 @@ service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
 
-# ... مراحل قبلی مانند: 
+
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
@@ -195,9 +229,10 @@ take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
-
-# حالا تغییر وضعیت 'Start After First Use' را انجام می‌دهیم:
 toggle_start_after_first_use_and_capture()
+
+print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
+update_duration_field_and_capture("21")
 
 print("تا اینجا عملیات تغییر وضعیت 'Start After First Use' و گرفتن اسکرین‌شات جدید به پایان رسید. منتظر دستور بعدی شما هستیم.")
 browser.quit()
