@@ -108,42 +108,40 @@ def edit_client_window_capture_before_after():
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
         time.sleep(3)  # صبر برای بارگذاری کامل پنجره
 
-        # گرفتن اسکرین‌شات قبل از اعمال تغییرات
+        # گرفتن اسکرین‌شات قبل از تغییرات
         before_screenshot_path = os.path.join("/root/Screen/", "edit_client_before.png")
         take_full_page_screenshot(browser, before_screenshot_path)
-        print("اسکرین‌شات قبل از تغییرات در پنجره 'Edit Client' ذخیره شد:", before_screenshot_path)
+        print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_screenshot_path)
 
-        # مرحله 1: تغییر مقدار "Total Flow" به 50
-        print("در حال تغییر مقدار 'Total Flow' به 50...")
+        # تغییر مقدار 'Total Flow' به 7
         total_flow_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input"))
         )
         total_flow_input.clear()
-        total_flow_input.send_keys("50")
-        print("مقدار 'Total Flow' تغییر یافت.")
+        total_flow_input.send_keys("7")
+        print("مقدار 'Total Flow' به 7 تغییر یافت.")
 
-        # مرحله 2: کلیک روی دکمه کشویی "Start After First Use" (برای باز شدن قسمت "Duration")
-        print("در حال کلیک روی دکمه کشویی 'Start After First Use'...")
+        # کلیک روی دکمه کشویی 'Start After First Use'
         start_after_button = WebDriverWait(browser, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//label[contains(text(),'Start After First Use')]/following-sibling::div//button"))
         )
         start_after_button.click()
-        print("دکمه کشویی 'Start After First Use' کلیک شد.")
+        print("دکمه 'Start After First Use' کلیک شد، قسمت 'Duration' باز شد.")
         time.sleep(2)
 
-        # مرحله 3: تغییر مقدار "Duration" به 30
-        print("در حال تغییر مقدار 'Duration' به 30...")
+        # تغییر مقدار 'Duration' به 8
         duration_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((By.XPATH, "//label[contains(text(),'Duration')]/following-sibling::div//input"))
         )
         duration_input.clear()
-        duration_input.send_keys("30")
-        print("مقدار 'Duration' تغییر یافت.")
+        duration_input.send_keys("8")
+        print("مقدار 'Duration' به 8 تغییر یافت.")
 
-        # گرفتن اسکرین‌شات بعد از اعمال تغییرات
+        # گرفتن اسکرین‌شات بعد از تغییرات
         after_screenshot_path = os.path.join("/root/Screen/", "edit_client_after.png")
         take_full_page_screenshot(browser, after_screenshot_path)
-        print("اسکرین‌شات بعد از تغییرات در پنجره 'Edit Client' ذخیره شد:", after_screenshot_path)
+        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_screenshot_path)
+
         
     except Exception as e:
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
