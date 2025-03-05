@@ -8,17 +8,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
     browser.execute_script("document.body.style.zoom='0.5'")
     time.sleep(2)
-    
     print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
     print("اسکرین‌شات صفحه ذخیره شد:", save_path)
-    
     print("در حال تغییر اندازه تصویر نهایی به 1080x720...")
     final_image = Image.open(save_path)
     final_image = final_image.resize((1080, 720), Image.LANCZOS)
@@ -89,9 +88,7 @@ def click_edit_client_button_and_capture():
         print("در حال یافتن دکمه 'Edit Client' با استفاده از CSS Selector...")
         wait = WebDriverWait(browser, 10)
         edit_elem = wait.until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
-            )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit"))
         )
         print("عنصر دکمه 'Edit Client' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
         browser.execute_script("arguments[0].click();", edit_elem)
@@ -103,39 +100,46 @@ def click_edit_client_button_and_capture():
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
 
+# توابع برای استفاده از ارسال کلید TAB جهت دستیابی به فیلد "Total Flow"
+def go_to_total_flow_field_by_tab(tab_count=6):
+    print(f"در حال ارسال {tab_count} بار کلید TAB جهت رسیدن به فیلد 'Total Flow'...")
+    actions = ActionChains(browser)
+    for _ in range(tab_count):
+        actions.send_keys(Keys.TAB)
+    actions.perform()
+    time.sleep(1)
 
-def test_total_flow_field():
+def edit_total_flow_value(new_value):
+    go_to_total_flow_field_by_tab(6)
+    active = browser.switch_to.active_element
+    active.clear()
+    active.send_keys(new_value)
+    print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+
+def edit_client_window_and_capture():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
-        time.sleep(3)  # صبر برای بارگذاری کامل پنجره Edit Client
+        time.sleep(3)
         
-        # گرفتن اسکرین‌شات قبل از تغییرات
+        # گرفتن اسکرین‌شات قبل از تغییر در پنجره Edit Client
         before_path = os.path.join("/root/Screen/", "edit_client_before.png")
         take_full_page_screenshot(browser, before_path)
-        print("اسکرین‌شات قبل از تغییرات در 'Total Flow' ذخیره شد:", before_path)
+        print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_path)
         
-        # یافتن فیلد 'Total Flow'
-        print("در حال یافتن فیلد 'Total Flow'...")
-        total_flow_input = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located((
-                By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input"
-            ))
-        )
-        # کلیک، پاک کردن فیلد و وارد کردن مقدار "7"
-        total_flow_input.click()
-        total_flow_input.clear()
-        total_flow_input.send_keys("7")
-        print("مقدار 'Total Flow' به 7 تغییر یافت.")
-        time.sleep(2)  # صبر برای اعمال تغییر
+        # فقط تغییر در فیلد "Total Flow"
+        print("در حال تغییر مقدار 'Total Flow' با استفاده از کلید TAB...")
+        edit_total_flow_value("7")
+        
+        # صبر برای اعمال تغییرات
+        time.sleep(2)
         
         # گرفتن اسکرین‌شات بعد از تغییرات
-        after_path = os.path.join("/root/Screen/", "edit_client_after_total_flow.png")
+        after_path = os.path.join("/root/Screen/", "edit_client_after.png")
         take_full_page_screenshot(browser, after_path)
-        print("اسکرین‌شات پس از تغییرات 'Total Flow' ذخیره شد:", after_path)
+        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
         
     except Exception as e:
-        print("خطا در تغییر مقدار 'Total Flow':", e)
-
+        print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
 # ------------------ Main Program ------------------
 print("در حال راه‌اندازی مرورگر...")
@@ -154,11 +158,9 @@ expand_all_inbound_rows()
 search_client_and_capture("FM")
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
-print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله ویرایش پنجره 'Edit Client' هستیم.")
-
+print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
-test_total_flow_field()
-
-print("تا اینجا عملیات ویرایش پنجره 'Edit Client' و گرفتن اسکرین‌شات صفحه نهایی به پایان رسید. منتظر دستور بعدی شما هستیم.")
+edit_client_window_and_capture()
+print("تا اینجا عملیات ویرایش پنجره 'Edit Client' و گرفتن اسکرین‌شات قبل و بعد از تغییر انجام شد. منتظر دستور بعدی شما هستیم.")
 browser.quit()
 print("مرورگر بسته شد.")
