@@ -136,29 +136,45 @@ def edit_total_flow_value(new_value):
 
 
 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 def toggle_start_after_first_use_and_capture():
     try:
-        # ارسال یک بار کلید TAB برای رفتن به دکمه "Start After First Use"
-        print("در حال ارسال 1 بار کلید TAB جهت رسیدن به دکمه 'Start After First Use'...")
-        actions = ActionChains(browser)
-        actions.send_keys(Keys.TAB)
-        actions.perform()
-        time.sleep(1)  # صبر برای انتقال فوکوس
+        print("در حال یافتن دکمه 'Start After First Use' با استفاده از CSS Selector داده‌شده...")
+        # استفاده از سلکتور دقیق برای دکمه "Start After First Use"
+        btn = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(7) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > button")
+            )
+        )
+        # بررسی وضعیت دکمه؛ اول از attribute "aria-pressed"
+        state = btn.get_attribute("aria-pressed")
+        if state is None:
+            # اگر attribute وجود ندارد، از کلاس ها برای تشخیص استفاده می‌کنیم؛ (برای نمونه اگر در حالت فعال کلاس "ant-switch-checked" وجود داشته باشد)
+            classes = btn.get_attribute("class")
+            if classes and "ant-switch-checked" in classes:
+                state = "true"
+            else:
+                state = "false"
+        print("وضعیت اولیه دکمه 'Start After First Use' برابر است با:", state)
         
-        # حالا کلید SPACE را ارسال می‌کنیم تا دکمه تغییر حالت دهد.
-        print("در حال فشار دادن کلید SPACE برای فعال‌سازی 'Start After First Use'...")
-        actions = ActionChains(browser)
-        actions.send_keys(Keys.SPACE)
-        actions.perform()
-        time.sleep(2)  # صبر برای اعمال تغییر حالت
+        # اگر دکمه در حالت غیرفعال (خاموش) است، آن را کلیک می‌کنیم
+        if state.lower() != "true":
+            print("دکمه در حالت خاموش است. در حال کلیک جهت فعال‌سازی...")
+            btn.click()
+            time.sleep(2)
+        else:
+            print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
         
-        # گرفتن اسکرین‌شات جدید از وضعیت
-        start_after_screenshot_path = os.path.join("/root/Screen/", "start_after_result.png")
-        take_full_page_screenshot(browser, start_after_screenshot_path)
-        print("اسکرین‌شات جدید از وضعیت 'Start After First Use' در مسیر ذخیره شد:", start_after_screenshot_path)
+        # گرفتن اسکرین‌شات از وضعیت به‌روز شده
+        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
+        take_full_page_screenshot(browser, screenshot_path)
+        print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
         
     except Exception as e:
-        print("خطا در عملیات تغییر وضعیت 'Start After First Use' یا گرفتن اسکرین‌شات:", e)
+        print("خطا در عملیات تغییر وضعیت دکمه 'Start After First Use':", e)
+
 
 
 def edit_client_window_and_capture():
@@ -268,7 +284,11 @@ take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
+
+# ... کدهای قبلی مربوط به ورود به پنل و ... 
+print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شده. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
 toggle_start_after_first_use_and_capture()
+
 print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
 update_duration_field_and_capture("21")
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله ذخیره تغییرات (Save Changes) می‌رویم.")
