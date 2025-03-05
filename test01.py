@@ -110,13 +110,30 @@ def go_to_total_flow_field_by_tab(tab_count=6):
     time.sleep(1)
 
 def edit_total_flow_value(new_value):
-    go_to_total_flow_field_by_tab(6)  # انتقال فوکوس به فیلد "Total Flow" با ارسال ۶ بار TAB
-    active = browser.switch_to.active_element
-    # پاکسازی فیلد با استفاده از دستور JavaScript
-    browser.execute_script("arguments[0].value='';", active)
-    # ارسال مقدار جدید به فیلد (فقط یک بار)
-    active.send_keys(new_value)
-    print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+    try:
+        print("در حال یافتن فیلد 'Total Flow' با استفاده از CSS Selector...")
+        total_flow_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.CSS_SELECTOR,
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(5) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+            ))
+        )
+        # پاکسازی اولیه با استفاده از clear()
+        total_flow_input.clear()
+        time.sleep(0.5)
+        # استفاده از JavaScript برای پاکسازی قطعی مقدار و به‌روز کردن وضعیت داخلی (dispatch event)
+        browser.execute_script(
+            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
+            total_flow_input
+        )
+        time.sleep(0.5)
+        # ارسال مقدار جدید به صورت تنها یکبار
+        total_flow_input.send_keys(new_value)
+        print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+    except Exception as e:
+        print("خطا در تغییر مقدار 'Total Flow':", e)
+
+
 
 
 def toggle_start_after_first_use_and_capture():
