@@ -84,14 +84,10 @@ def search_client_and_capture(client_name):
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 def click_edit_client_button_and_capture():
     try:
         print("در حال یافتن دکمه 'Edit Client' با استفاده از CSS Selector...")
         wait = WebDriverWait(browser, 10)
-        # پیدا کردن عنصر Edit Client بر اساس کلاس‌های داده‌شده
         edit_elem = wait.until(
             EC.presence_of_element_located(
                 (By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
@@ -100,15 +96,54 @@ def click_edit_client_button_and_capture():
         print("عنصر دکمه 'Edit Client' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
         browser.execute_script("arguments[0].click();", edit_elem)
         print("کلیک روی دکمه 'Edit Client' انجام شد.")
-        time.sleep(5)  # صبر جهت بارگذاری صفحه پس از کلیک
-        
+        time.sleep(5)
         result_screenshot_path = os.path.join("/root/Screen/", "edit_client_result.png")
         take_full_page_screenshot(browser, result_screenshot_path)
         print("اسکرین‌شات نتیجه 'Edit Client' در مسیر ذخیره شد:", result_screenshot_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
 
-
+def edit_client_window_and_capture():
+    try:
+        print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
+        time.sleep(3)
+        
+        print("در حال تغییر مقدار 'Total Flow' به 50...")
+        total_flow_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input")
+            )
+        )
+        total_flow_input.clear()
+        total_flow_input.send_keys("50")
+        print("مقدار 'Total Flow' تغییر یافت.")
+        
+        print("در حال کلیک روی دکمه کشویی 'Start After First Use'...")
+        start_after_button = WebDriverWait(browser, 10).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//label[contains(text(),'Start After First Use')]/following-sibling::div//button")
+            )
+        )
+        start_after_button.click()
+        print("دکمه کشویی 'Start After First Use' کلیک شد؛ در حال باز شدن بخش 'Duration'...")
+        time.sleep(2)
+        
+        print("در حال تغییر مقدار 'Duration' به 30...")
+        duration_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//label[contains(text(),'Duration')]/following-sibling::div//input")
+            )
+        )
+        duration_input.clear()
+        duration_input.send_keys("30")
+        print("مقدار 'Duration' تغییر یافت.")
+        
+        final_edit_screenshot_path = os.path.join("/root/Screen/", "edit_client_result.png")
+        take_full_page_screenshot(browser, final_edit_screenshot_path)
+        print("اسکرین‌شات پنجره 'Edit Client' به صورت کامل ذخیره شد در:", final_edit_screenshot_path)
+        
+    except Exception as e:
+        print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
 # ------------------ Main Program ------------------
 print("در حال راه‌اندازی مرورگر...")
@@ -120,20 +155,16 @@ service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
 
-# اجرای مراحل اصلی:
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 expand_all_inbound_rows()
 search_client_and_capture("FM")
-# (اختیاری) گرفتن اسکرین‌شات از صفحه Inbounds پس از انجام عملیات
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
-print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله کلیک روی دکمه 'Edit Client' هستیم.")
-
+print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله ویرایش پنجره 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
-
-print("تا اینجا عملیات کلیک روی دکمه 'Edit Client' و گرفتن اسکرین‌شات صفحه نهایی به پایان رسید. منتظر دستور بعدی شما هستیم.")
+edit_client_window_and_capture()
+print("تا اینجا عملیات ویرایش پنجره 'Edit Client' و گرفتن اسکرین‌شات صفحه نهایی به پایان رسید. منتظر دستور بعدی شما هستیم.")
 browser.quit()
 print("مرورگر بسته شد.")
-
