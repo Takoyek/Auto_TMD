@@ -203,35 +203,28 @@ def edit_client_window_and_capture():
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
 
-def update_duration_field_and_capture(new_value="21"):
+def update_duration_field_by_selector(new_value="23"):
     try:
-        print("در حال ارسال یک بار کلید TAB جهت انتقال به فیلد 'Duration'...")
-        actions = ActionChains(browser)
-        actions.send_keys(Keys.TAB)
-        actions.perform()
-        time.sleep(1)  # صبر برای انتقال فوکوس
-        
-        # دریافت عنصری که در حال حاضر فوکوس دارد (که باید فیلد Duration باشد)
-        active_elem = browser.switch_to.active_element
-        print("عنصر فعال، که باید مربوط به فیلد 'Duration' باشد، یافته شد.")
-        
-        # پاک‌سازی مقدار فعلی فیلد 'Duration'
-        print("در حال پاک کردن مقدار فعلی در فیلد 'Duration'...")
-        browser.execute_script("arguments[0].value='';", active_elem)
+        print("در حال یافتن فیلد 'Duration' با استفاده از CSS Selector داده‌شده...")
+        duration_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.CSS_SELECTOR,
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(8) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+            ))
+        )
+        print("فیلد 'Duration' پیدا شد. در حال پاکسازی مقدار قبلی...")
+        # پاکسازی اولیه با استفاده از clear()
+        duration_input.clear()
         time.sleep(0.5)
-        
-        # وارد کردن مقدار جدید
-        print("در حال وارد کردن مقدار جدید برای فیلد 'Duration'...")
-        active_elem.send_keys(new_value)
+        # پاکسازی قطعی مقدار فیلد با استفاده از جاوااسکریپت و dispatch رویداد input
+        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", duration_input)
+        time.sleep(0.5)
+        # ارسال مقدار جدید (تنها یک بار)
+        duration_input.send_keys(new_value)
         print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
-        
-        # گرفتن اسکرین‌شات از وضعیت جدید
-        duration_screenshot_path = os.path.join("/root/Screen/", "duration_updated.png")
-        take_full_page_screenshot(browser, duration_screenshot_path)
-        print("اسکرین‌شات وضعیت به‌روز شده فیلد 'Duration' در مسیر ذخیره شد:", duration_screenshot_path)
-        
     except Exception as e:
-        print("خطا در به‌روزرسانی فیلد 'Duration':", e)
+        print("خطا در به‌روز کردن فیلد 'Duration':", e)
+
 
 
 def save_changes_and_capture():
@@ -289,8 +282,9 @@ edit_client_window_and_capture()
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شده. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
 toggle_start_after_first_use_and_capture()
 
-print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
-update_duration_field_and_capture("21")
+print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
+update_duration_field_by_selector("23")
+
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله ذخیره تغییرات (Save Changes) می‌رویم.")
 save_changes_and_capture()
 print("عملیات تمدید اشتراک کاربر با موفقیت انجام شد.")
