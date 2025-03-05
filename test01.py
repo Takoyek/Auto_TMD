@@ -110,11 +110,44 @@ def go_to_total_flow_field_by_tab(tab_count=6):
     time.sleep(1)
 
 def edit_total_flow_value(new_value):
-    go_to_total_flow_field_by_tab(6)
+    go_to_total_flow_field_by_tab(6)  # انتقال فوکوس به فیلد "Total Flow" با ارسال ۶ بار TAB
     active = browser.switch_to.active_element
-    active.clear()
+    # پاکسازی فیلد با انتخاب تمام متن و حذف آن
+    active.send_keys(Keys.CONTROL, "a")
+    active.send_keys(Keys.DELETE)
+    # ارسال مقدار جدید
     active.send_keys(new_value)
     print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+
+
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+
+def toggle_start_after_first_use_and_capture():
+    try:
+        # ارسال یک بار کلید TAB برای رفتن به دکمه "Start After First Use"
+        print("در حال ارسال 1 بار کلید TAB جهت رسیدن به دکمه 'Start After First Use'...")
+        actions = ActionChains(browser)
+        actions.send_keys(Keys.TAB)
+        actions.perform()
+        time.sleep(1)  # صبر برای انتقال فوکوس
+        
+        # حالا کلید SPACE را ارسال می‌کنیم تا دکمه تغییر حالت دهد.
+        print("در حال فشار دادن کلید SPACE برای فعال‌سازی 'Start After First Use'...")
+        actions = ActionChains(browser)
+        actions.send_keys(Keys.SPACE)
+        actions.perform()
+        time.sleep(2)  # صبر برای اعمال تغییر حالت
+        
+        # گرفتن اسکرین‌شات جدید از وضعیت
+        start_after_screenshot_path = os.path.join("/root/Screen/", "start_after_result.png")
+        take_full_page_screenshot(browser, start_after_screenshot_path)
+        print("اسکرین‌شات جدید از وضعیت 'Start After First Use' در مسیر ذخیره شد:", start_after_screenshot_path)
+        
+    except Exception as e:
+        print("خطا در عملیات تغییر وضعیت 'Start After First Use' یا گرفتن اسکرین‌شات:", e)
+
+
 
 def edit_client_window_and_capture():
     try:
@@ -151,6 +184,7 @@ service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
 
+# ... مراحل قبلی مانند: 
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
@@ -161,6 +195,11 @@ take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
-print("تا اینجا عملیات ویرایش پنجره 'Edit Client' و گرفتن اسکرین‌شات قبل و بعد از تغییر انجام شد. منتظر دستور بعدی شما هستیم.")
+
+# حالا تغییر وضعیت 'Start After First Use' را انجام می‌دهیم:
+toggle_start_after_first_use_and_capture()
+
+print("تا اینجا عملیات تغییر وضعیت 'Start After First Use' و گرفتن اسکرین‌شات جدید به پایان رسید. منتظر دستور بعدی شما هستیم.")
 browser.quit()
 print("مرورگر بسته شد.")
+
