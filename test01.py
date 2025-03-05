@@ -103,48 +103,38 @@ def click_edit_client_button_and_capture():
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
 
-def edit_client_window_capture_before_after():
+
+def test_total_flow_field():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
-        time.sleep(3)  # صبر برای بارگذاری کامل پنجره
-
+        time.sleep(3)  # صبر برای بارگذاری کامل پنجره Edit Client
+        
         # گرفتن اسکرین‌شات قبل از تغییرات
-        before_screenshot_path = os.path.join("/root/Screen/", "edit_client_before.png")
-        take_full_page_screenshot(browser, before_screenshot_path)
-        print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_screenshot_path)
-
-        # تغییر مقدار 'Total Flow' به 7
+        before_path = os.path.join("/root/Screen/", "edit_client_before.png")
+        take_full_page_screenshot(browser, before_path)
+        print("اسکرین‌شات قبل از تغییرات در 'Total Flow' ذخیره شد:", before_path)
+        
+        # یافتن فیلد 'Total Flow'
+        print("در حال یافتن فیلد 'Total Flow'...")
         total_flow_input = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input"))
+            EC.presence_of_element_located((
+                By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input"
+            ))
         )
+        # کلیک، پاک کردن فیلد و وارد کردن مقدار "7"
+        total_flow_input.click()
         total_flow_input.clear()
         total_flow_input.send_keys("7")
         print("مقدار 'Total Flow' به 7 تغییر یافت.")
-
-        # کلیک روی دکمه کشویی 'Start After First Use'
-        start_after_button = WebDriverWait(browser, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//label[contains(text(),'Start After First Use')]/following-sibling::div//button"))
-        )
-        start_after_button.click()
-        print("دکمه 'Start After First Use' کلیک شد، قسمت 'Duration' باز شد.")
-        time.sleep(2)
-
-        # تغییر مقدار 'Duration' به 8
-        duration_input = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//label[contains(text(),'Duration')]/following-sibling::div//input"))
-        )
-        duration_input.clear()
-        duration_input.send_keys("8")
-        print("مقدار 'Duration' به 8 تغییر یافت.")
-
+        time.sleep(2)  # صبر برای اعمال تغییر
+        
         # گرفتن اسکرین‌شات بعد از تغییرات
-        after_screenshot_path = os.path.join("/root/Screen/", "edit_client_after.png")
-        take_full_page_screenshot(browser, after_screenshot_path)
-        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_screenshot_path)
-
+        after_path = os.path.join("/root/Screen/", "edit_client_after_total_flow.png")
+        take_full_page_screenshot(browser, after_path)
+        print("اسکرین‌شات پس از تغییرات 'Total Flow' ذخیره شد:", after_path)
         
     except Exception as e:
-        print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
+        print("خطا در تغییر مقدار 'Total Flow':", e)
 
 
 # ------------------ Main Program ------------------
@@ -167,7 +157,7 @@ take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله ویرایش پنجره 'Edit Client' هستیم.")
 
 click_edit_client_button_and_capture()
-edit_client_window_capture_before_after()
+test_total_flow_field()
 
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' و گرفتن اسکرین‌شات صفحه نهایی به پایان رسید. منتظر دستور بعدی شما هستیم.")
 browser.quit()
