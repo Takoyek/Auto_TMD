@@ -103,47 +103,51 @@ def click_edit_client_button_and_capture():
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
 
-def edit_client_window_and_capture():
+def edit_client_window_capture_before_after():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
-        time.sleep(3)
-        
+        time.sleep(3)  # صبر برای بارگذاری کامل پنجره
+
+        # گرفتن اسکرین‌شات قبل از اعمال تغییرات
+        before_screenshot_path = os.path.join("/root/Screen/", "edit_client_before.png")
+        take_full_page_screenshot(browser, before_screenshot_path)
+        print("اسکرین‌شات قبل از تغییرات در پنجره 'Edit Client' ذخیره شد:", before_screenshot_path)
+
+        # مرحله 1: تغییر مقدار "Total Flow" به 50
         print("در حال تغییر مقدار 'Total Flow' به 50...")
         total_flow_input = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input")
-            )
+            EC.presence_of_element_located((By.XPATH, "//label[contains(text(),'Total Flow')]/following-sibling::div//input"))
         )
         total_flow_input.clear()
         total_flow_input.send_keys("50")
         print("مقدار 'Total Flow' تغییر یافت.")
-        
+
+        # مرحله 2: کلیک روی دکمه کشویی "Start After First Use" (برای باز شدن قسمت "Duration")
         print("در حال کلیک روی دکمه کشویی 'Start After First Use'...")
         start_after_button = WebDriverWait(browser, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, "//label[contains(text(),'Start After First Use')]/following-sibling::div//button")
-            )
+            EC.element_to_be_clickable((By.XPATH, "//label[contains(text(),'Start After First Use')]/following-sibling::div//button"))
         )
         start_after_button.click()
-        print("دکمه کشویی 'Start After First Use' کلیک شد؛ در حال باز شدن بخش 'Duration'...")
+        print("دکمه کشویی 'Start After First Use' کلیک شد.")
         time.sleep(2)
-        
+
+        # مرحله 3: تغییر مقدار "Duration" به 30
         print("در حال تغییر مقدار 'Duration' به 30...")
         duration_input = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//label[contains(text(),'Duration')]/following-sibling::div//input")
-            )
+            EC.presence_of_element_located((By.XPATH, "//label[contains(text(),'Duration')]/following-sibling::div//input"))
         )
         duration_input.clear()
         duration_input.send_keys("30")
         print("مقدار 'Duration' تغییر یافت.")
-        
-        final_edit_screenshot_path = os.path.join("/root/Screen/", "edit_client_result.png")
-        take_full_page_screenshot(browser, final_edit_screenshot_path)
-        print("اسکرین‌شات پنجره 'Edit Client' به صورت کامل ذخیره شد در:", final_edit_screenshot_path)
+
+        # گرفتن اسکرین‌شات بعد از اعمال تغییرات
+        after_screenshot_path = os.path.join("/root/Screen/", "edit_client_after.png")
+        take_full_page_screenshot(browser, after_screenshot_path)
+        print("اسکرین‌شات بعد از تغییرات در پنجره 'Edit Client' ذخیره شد:", after_screenshot_path)
         
     except Exception as e:
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
+
 
 # ------------------ Main Program ------------------
 print("در حال راه‌اندازی مرورگر...")
@@ -163,8 +167,10 @@ search_client_and_capture("FM")
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله ویرایش پنجره 'Edit Client' هستیم.")
+
 click_edit_client_button_and_capture()
-edit_client_window_and_capture()
+edit_client_window_capture_before_after()
+
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' و گرفتن اسکرین‌شات صفحه نهایی به پایان رسید. منتظر دستور بعدی شما هستیم.")
 browser.quit()
 print("مرورگر بسته شد.")
