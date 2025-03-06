@@ -132,6 +132,52 @@ def edit_total_flow_value(new_value):
         print("خطا در تغییر مقدار 'Total Flow':", e)
 
 
+
+def click_reset_traffic():
+    try:
+        print("در حال یافتن دکمه 'Reset Traffic' با استفاده از XPath نسبی بر اساس 'Usage'...")
+        reset_button = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Usage')]]//i"
+            ))
+        )
+        print("دکمه 'Reset Traffic' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
+        browser.execute_script("arguments[0].click();", reset_button)
+        print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
+        time.sleep(2)
+        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
+        take_full_page_screenshot(browser, reset_screenshot_path)
+        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
+        error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات 'Reset Traffic' ذخیره شد در:", error_screenshot)
+
+def click_reset_confirmation_and_capture():
+    try:
+        print("در حال انتظار برای نمایش پنجره تایید Reset Traffic...")
+        # منتظر می‌شویم تا پنجره تایید ظاهر شود؛ استفاده از یک XPath تقریبی برای یافتن متن تایید
+        confirmation = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
+            )
+        )
+        print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
+        ActionChains(browser).send_keys(Keys.ENTER).perform()
+        time.sleep(2)
+        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
+        take_full_page_screenshot(browser, confirm_screenshot_path)
+        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات تایید Reset Traffic:", e)
+        error_screenshot = os.path.join("/root/Screen/", "reset_confirm_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
+
+
+
 def edit_client_window_and_capture(): # مربوط به اسکرین شات گرفتن از ثبل و بعد مرحله "Total Flow"
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
@@ -142,6 +188,9 @@ def edit_client_window_and_capture(): # مربوط به اسکرین شات گر
         print("در حال تغییر مقدار 'Total Flow'...")
         edit_total_flow_value("7")
         time.sleep(2)
+        click_reset_traffic()
+        # بعد از کلیک روی Reset Traffic، تایید را انجام می‌دهیم
+        click_reset_confirmation_and_capture()
         after_path = os.path.join("/root/Screen/", "edit_client_after.png")
         take_full_page_screenshot(browser, after_path)
         print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
@@ -240,7 +289,7 @@ login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 # ابتدا کلاینت جستجو شود
-search_client_and_capture("d50b2647-e8f6-4ea3-8bc9-6ad11b84241b")
+search_client_and_capture("929b7245-354a-4ada-97f1-1a447a4ecd9a")
 # سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
