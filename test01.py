@@ -240,7 +240,7 @@ login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 # ابتدا کلاینت جستجو شود
-search_client_and_capture("FM")
+search_client_and_capture("d50b2647-e8f6-4ea3-8bc9-6ad11b84241b")
 # سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")

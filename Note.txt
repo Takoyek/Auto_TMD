@@ -310,7 +310,15 @@ def update_duration_field_by_selector(new_value="23"):
 
 ------------------------------------------------------
 d83cf6f7-1afb-4fbf-a26f-ed4f66323289
+d50b2647-e8f6-4ea3-8bc9-6ad11b84241b
 ------------------------------------------------------
+آفرین تمام خطاها رفع شدند. ممنونم
+فقط اینکه در پنجره "Edit Client" بعد از عملیت مربوط به "Total Flow"
+کیک بر روی دکمه "Reset Traffic" که روبروی "Usage" قرار گرفته است را فراموش کردم بهت بگم که در کد قرار بدیش.
+کد سلکتوری که برای دکمه "Reset Traffic" کپی کرده ام به صورت زیر است:
+#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(9) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > i > svg
+
+باید روی دکمه "Reset Traffic" که مابین "Total Flow" و "Start After First Use" قرار دارد کلیک نماید.
 
 ------------------------------------------------------
 
