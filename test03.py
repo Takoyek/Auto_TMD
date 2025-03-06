@@ -114,7 +114,7 @@ def edit_total_flow_value(new_value):
         total_flow_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(11) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(8) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
             ))
         )
         total_flow_input.clear()
