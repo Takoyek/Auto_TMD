@@ -178,11 +178,50 @@ i.normal-icon.anticon.anticon-edit
 ------------------------------------------------------
 d83cf6f7-1afb-4fbf-a26f-ed4f66323289
 ------------------------------------------------------
+مشکل انتظار نیست. مشکل در پیدا کردن فیلدها در پنجره Edit Client است.
+به طور مثال وقتی فیلد:
+#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(7) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input
+
+مکانش تغییر پیدا میکند، کد سلکتور آن نیز تغییر به صورت زیر تغییر پیدا میکند:
+#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(9) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input
+
+چه راه حلی برای غلبه به این مشکل پیشنهاد میکنی؟
 
 ------------------------------------------------------
+به نظر میرسد توانایی درک اسکرین شات هایی که برایت فرستادم را نداری، بنابراین به صورت نوشتاری برایت توضیح میدهم.
+این پنجره تشکیل شده است از فیلد هایی که این فیلد ها توسط کدی که برایم نوشتی باید تغییر کند.
+در سمت چپ هر فیلد نام آن فیلد به صورت زیر نوشته شده است:
+Total Flow فیلد مربوطش در کنارش
+Start After First Use دکمه مربوطش در کنارش
+Duration فیلد مربوطش در کنارش
+مکان دکمه Save Changes هم که برای همیشه ثابت است.
 
 ------------------------------------------------------
-
+برای فیلد مربوط به "Total Flow"  که کدش را در زیر است، چه تغییراتی باید اعمال گردد؟
+def edit_total_flow_value(new_value):
+    try:
+        print("در حال یافتن فیلد 'Total Flow' با استفاده از CSS Selector...")
+        total_flow_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.CSS_SELECTOR,
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(7) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+            ))
+        )
+        # پاکسازی اولیه با استفاده از clear()
+        total_flow_input.clear()
+        time.sleep(0.5)
+        # استفاده از JavaScript برای پاکسازی قطعی مقدار و به‌روز کردن وضعیت داخلی (dispatch event)
+        browser.execute_script(
+            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
+            total_flow_input
+        )
+        time.sleep(0.5)
+        # ارسال مقدار جدید به صورت تنها یکبار
+        total_flow_input.send_keys(new_value)
+        print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+    except Exception as e:
+        print("خطا در تغییر مقدار 'Total Flow':", e)
+        
 ------------------------------------------------------
 
 ------------------------------------------------------
