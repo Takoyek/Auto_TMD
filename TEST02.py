@@ -53,6 +53,25 @@ def click_inbounds():
     time.sleep(5)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
 
+def expand_all_inbound_rows():
+    print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
+    try:
+        expand_buttons = browser.find_elements(
+            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
+        )
+        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
+        for btn in expand_buttons:
+            try:
+                browser.execute_script("arguments[0].scrollIntoView(true);", btn)
+                time.sleep(0.5)
+                btn.click()
+            except Exception as ex:
+                print("خطا در کلیک روی دکمه Expand: ", ex)
+            time.sleep(1)
+        print("تمامی زیرمجموعه‌های اینباند باز شدند.")
+    except Exception as e:
+        print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
+
 def search_client_and_capture(client_name):
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
@@ -68,20 +87,6 @@ def search_client_and_capture(client_name):
     full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
-
-def expand_all_inbound_rows():
-    print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
-    try:
-        expand_buttons = browser.find_elements(
-            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
-        )
-        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
-        for btn in expand_buttons:
-            btn.click()
-            time.sleep(1)
-        print("تمامی زیرمجموعه‌های اینباند باز شدند.")
-    except Exception as e:
-        print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
 
 def click_edit_client_button_and_capture():
     try:
@@ -142,6 +147,7 @@ def toggle_start_after_first_use_and_capture():
                 (By.CSS_SELECTOR, "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(7) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > button")
             )
         )
+        browser.execute_script("arguments[0].scrollIntoView(true);", btn)
         state = btn.get_attribute("aria-pressed")
         if state is None:
             classes = btn.get_attribute("class")
@@ -190,6 +196,7 @@ def save_changes_and_capture():
                 "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > div > button.ant-btn.ant-btn-primary"
             ))
         )
+        browser.execute_script("arguments[0].scrollIntoView(true);", save_button)
         print("دکمه 'Save Changes' پیدا شد. در حال کلیک روی آن...")
         browser.execute_script("arguments[0].click();", save_button)
         print("کلیک روی دکمه 'Save Changes' انجام شد.")
