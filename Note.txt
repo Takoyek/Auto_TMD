@@ -176,7 +176,6 @@ i.normal-icon.anticon.anticon-edit
 حالا در مرحله بعدی برای کلیک کردن بر روی دکمه "Save Changes" به جای استفاده از کلید تب، باید از سلکتور زیر استفاده کنی:
 #client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > div > button.ant-btn.ant-btn-primary
 ------------------------------------------------------
-d83cf6f7-1afb-4fbf-a26f-ed4f66323289
 ------------------------------------------------------
 مشکل انتظار نیست. مشکل در پیدا کردن فیلدها در پنجره Edit Client است.
 به طور مثال وقتی فیلد:
@@ -255,11 +254,62 @@ Quit Browser
 End
 
 ------------------------------------------------------
+آفرین کاری روی کد انجام دادی به درستی انجام شد و کار کرد. ممنونم.
+حالا برای تغییر وضعیت دکمه "Start After First Use" که کدش به صورت زیر است تیز همین کار را انجام بده:
+def toggle_start_after_first_use_and_capture():
+    try:
+        print("در حال یافتن دکمه 'Start After First Use' با استفاده از CSS Selector داده‌شده...")
+        btn = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(7) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > button")
+            )
+        )
+        browser.execute_script("arguments[0].scrollIntoView(true);", btn)
+        state = btn.get_attribute("aria-pressed")
+        if state is None:
+            classes = btn.get_attribute("class")
+            if classes and "ant-switch-checked" in classes:
+                state = "true"
+            else:
+                state = "false"
+        print("وضعیت اولیه دکمه 'Start After First Use' برابر است با:", state)
+        if state.lower() != "true":
+            print("دکمه در حالت خاموش است. در حال کلیک جهت فعال‌سازی...")
+            btn.click()
+            time.sleep(2)
+        else:
+            print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
+        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
+        take_full_page_screenshot(browser, screenshot_path)
+        print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات تغییر وضعیت دکمه 'Start After First Use':", e)
 
 ------------------------------------------------------
+درست کار کرد.
+همین کار را برای قسمت "Duration" که مدش به شرح زیر است نیز انجام بده:
+
+def update_duration_field_by_selector(new_value="23"):
+    try:
+        print("در حال یافتن فیلد 'Duration' با استفاده از CSS Selector داده‌شده...")
+        duration_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.CSS_SELECTOR,
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(8) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+            ))
+        )
+        print("فیلد 'Duration' پیدا شد. در حال پاکسازی مقدار قبلی...")
+        duration_input.clear()
+        time.sleep(0.5)
+        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", duration_input)
+        time.sleep(0.5)
+        duration_input.send_keys(new_value)
+        print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
+    except Exception as e:
+        print("خطا در به‌روز کردن فیلد 'Duration':", e)
 
 ------------------------------------------------------
-
+d83cf6f7-1afb-4fbf-a26f-ed4f66323289
 ------------------------------------------------------
 
 ------------------------------------------------------
