@@ -148,6 +148,26 @@ def click_reset_traffic():
         take_full_page_screenshot(browser, error_screenshot)
         print("اسکرین‌شات خطا در عملیات 'Reset Traffic' ذخیره شد در:", error_screenshot)
 
+def click_reset_confirmation_and_capture():
+    try:
+        print("در حال انتظار برای نمایش پنجره تایید Reset Traffic...")
+        # منتظر می‌شویم تا پنجره تایید ظاهر شود؛ استفاده از یک XPath تقریبی برای یافتن متن تایید
+        confirmation = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
+            )
+        )
+        print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
+        ActionChains(browser).send_keys(Keys.ENTER).perform()
+        time.sleep(2)
+        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
+        take_full_page_screenshot(browser, confirm_screenshot_path)
+        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات تایید Reset Traffic:", e)
+        error_screenshot = os.path.join("/root/Screen/", "reset_confirm_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
 def edit_client_window_and_capture():
     try:
@@ -160,6 +180,8 @@ def edit_client_window_and_capture():
         edit_total_flow_value("7")
         time.sleep(2)
         click_reset_traffic()
+        # بعد از کلیک روی Reset Traffic، تایید را انجام می‌دهیم
+        click_reset_confirmation_and_capture()
         after_path = os.path.join("/root/Screen/", "edit_client_after.png")
         take_full_page_screenshot(browser, after_path)
         print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
