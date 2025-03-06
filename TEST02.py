@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
-    browser.execute_script("document.body.style.zoom='0.5'")
+    browser.execute_script("document.body.style.zoom='50%'")  # دقت کنید که ممکن است "50%" برابر با 50% باشد
     time.sleep(2)
     print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
@@ -111,10 +111,7 @@ def edit_total_flow_value(new_value):
         )
         total_flow_input.clear()
         time.sleep(0.5)
-        browser.execute_script(
-            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
-            total_flow_input
-        )
+        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", total_flow_input)
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
         print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
@@ -223,7 +220,7 @@ take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
-print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
+print("تا اینجا عملیات در پنجره 'Edit Client' انجام شد. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
 toggle_start_after_first_use_and_capture()
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
 update_duration_field_by_selector("23")
