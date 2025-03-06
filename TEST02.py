@@ -53,6 +53,24 @@ def click_inbounds():
     time.sleep(5)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
 
+
+def search_client_and_capture(client_name):
+    print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
+    try:
+        search_input = browser.find_element(By.XPATH, "//input[@placeholder='Search']")
+    except Exception as e:
+        print("خطا در یافتن فیلد جستجو:", e)
+        return
+    search_input.clear()
+    search_input.send_keys(client_name)
+    search_input.send_keys(Keys.RETURN)
+    print(f"نام کلاینت '{client_name}' ارسال شد. در حال جستجو...")
+    time.sleep(3)
+    full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
+    take_full_page_screenshot(browser, full_search_screenshot)
+    print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+
+
 def expand_all_inbound_rows():
     print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
     try:
@@ -72,21 +90,6 @@ def expand_all_inbound_rows():
     except Exception as e:
         print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
 
-def search_client_and_capture(client_name):
-    print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
-    try:
-        search_input = browser.find_element(By.XPATH, "//input[@placeholder='Search']")
-    except Exception as e:
-        print("خطا در یافتن فیلد جستجو:", e)
-        return
-    search_input.clear()
-    search_input.send_keys(client_name)
-    search_input.send_keys(Keys.RETURN)
-    print(f"نام کلاینت '{client_name}' ارسال شد. در حال جستجو...")
-    time.sleep(3)
-    full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
-    take_full_page_screenshot(browser, full_search_screenshot)
-    print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
 
 def click_edit_client_button_and_capture():
     try:
