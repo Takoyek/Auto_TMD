@@ -340,4 +340,28 @@ search_client_and_capture("FM")
 search_client_and_capture("d50b2647-e8f6-4ea3-8bc9-6ad11b84241b")
 
 ------------------------------------------------------
+کاملا صحیح کارد کرد. ممنونم ازت
+حالا برای کلیک بر روی دکمه "Reset Traffic" که در سمت چپش نوشته "Usage" که کدش به صورت زیر است نیز همین کار را انجام بده:
+def click_reset_traffic():
+    try:
+        print("در حال یافتن دکمه 'Reset Traffic' با استفاده از CSS Selector داده‌شده...")
+        reset_button = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.CSS_SELECTOR,
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(9) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > i > svg > path"
+            ))
+        )
+        print("دکمه 'Reset Traffic' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
+        browser.execute_script("arguments[0].click();", reset_button)
+        print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
+        time.sleep(2)
+        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
+        take_full_page_screenshot(browser, reset_screenshot_path)
+        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
+        error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات 'Reset Traffic' ذخیره شد در:", error_screenshot)
+
 

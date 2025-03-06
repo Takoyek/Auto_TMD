@@ -129,7 +129,7 @@ def click_reset_traffic():
         reset_button = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(9) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > i > svg"
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(9) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > i > svg > path"
             ))
         )
         print("دکمه 'Reset Traffic' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
@@ -138,13 +138,13 @@ def click_reset_traffic():
         time.sleep(2)
         reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
         take_full_page_screenshot(browser, reset_screenshot_path)
-        print("اسکرین‌شات نتیجه 'Reset Traffic' ذخیره شد در:", reset_screenshot_path)
+        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
-        # در صورت خطا، یک اسکرین‌شات ذخیره می‌کنیم تا بتوانید مشکل را بررسی کنید.
         error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
         take_full_page_screenshot(browser, error_screenshot)
         print("اسکرین‌شات خطا در عملیات 'Reset Traffic' ذخیره شد در:", error_screenshot)
+
 
 
 def edit_client_window_and_capture():
