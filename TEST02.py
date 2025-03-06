@@ -123,13 +123,14 @@ def edit_total_flow_value(new_value):
     except Exception as e:
         print("خطا در تغییر مقدار 'Total Flow':", e)
 
+
 def click_reset_traffic():
     try:
-        print("در حال یافتن دکمه 'Reset Traffic' با استفاده از CSS Selector داده‌شده...")
+        print("در حال یافتن دکمه 'Reset Traffic' با استفاده از XPath نسبی بر اساس 'Usage'...")
         reset_button = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
-                By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(9) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > i > svg > path"
+                By.XPATH,
+                "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Usage')]]//i"
             ))
         )
         print("دکمه 'Reset Traffic' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
