@@ -141,6 +141,11 @@ def click_reset_traffic():
         print("اسکرین‌شات نتیجه 'Reset Traffic' ذخیره شد در:", reset_screenshot_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
+        # در صورت خطا، یک اسکرین‌شات ذخیره می‌کنیم تا بتوانید مشکل را بررسی کنید.
+        error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات 'Reset Traffic' ذخیره شد در:", error_screenshot)
+
 
 def edit_client_window_and_capture():
     try:
