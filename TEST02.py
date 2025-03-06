@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
-    browser.execute_script("document.body.style.zoom='50%'")  # دقت کنید که ممکن است "50%" برابر با 50% باشد
+    browser.execute_script("document.body.style.zoom='50%'")
     time.sleep(2)
     print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
@@ -53,20 +53,6 @@ def click_inbounds():
     time.sleep(5)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
 
-def expand_all_inbound_rows():
-    print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
-    try:
-        expand_buttons = browser.find_elements(
-            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
-        )
-        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
-        for btn in expand_buttons:
-            btn.click()
-            time.sleep(1)
-        print("تمامی زیرمجموعه‌های اینباند باز شدند.")
-    except Exception as e:
-        print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
-
 def search_client_and_capture(client_name):
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
@@ -82,6 +68,20 @@ def search_client_and_capture(client_name):
     full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+
+def expand_all_inbound_rows():
+    print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
+    try:
+        expand_buttons = browser.find_elements(
+            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
+        )
+        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
+        for btn in expand_buttons:
+            btn.click()
+            time.sleep(1)
+        print("تمامی زیرمجموعه‌های اینباند باز شدند.")
+    except Exception as e:
+        print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
 
 def click_edit_client_button_and_capture():
     try:
@@ -213,8 +213,10 @@ print("مرورگر راه‌اندازی شد.")
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
-expand_all_inbound_rows()
+# ابتدا کلاینت جستجو شود
 search_client_and_capture("FM")
+# سپس زیرمجموعه‌های اینباند باز شوند
+expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
