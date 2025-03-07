@@ -13,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
-    browser.execute_script("document.body.style.zoom='0.5'")
+    browser.execute_script("document.body.style.zoom='50%'")
     time.sleep(2)
     print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
@@ -53,20 +53,6 @@ def click_inbounds():
     time.sleep(5)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
 
-def expand_all_inbound_rows():
-    print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
-    try:
-        expand_buttons = browser.find_elements(
-            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
-        )
-        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
-        for btn in expand_buttons:
-            btn.click()
-            time.sleep(1)
-        print("تمامی زیرمجموعه‌های اینباند باز شدند.")
-    except Exception as e:
-        print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
-
 def search_client_and_capture(client_name):
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
@@ -82,6 +68,28 @@ def search_client_and_capture(client_name):
     full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+
+def expand_all_inbound_rows():
+    print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
+    try:
+        expand_buttons = browser.find_elements(
+            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
+        )
+        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
+        for btn in expand_buttons:
+            try:
+                browser.execute_script("arguments[0].scrollIntoView(true);", btn)
+                time.sleep(0.5)
+                btn.click()
+            except Exception as ex:
+                print("خطا در کلیک روی دکمه Expand: ", ex)
+            time.sleep(1)
+        print("تمامی زیرمجموعه‌های اینباند باز شدند.")
+    except Exception as e:
+        print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
+    full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
+    take_full_page_screenshot(browser, full_screenshot_path)
+    print("اسکرین‌شات کامل باز کردن زیرمجموعه‌های اینباند ذخیره شد در:", full_screenshot_path)
 
 def click_edit_client_button_and_capture():
     try:
@@ -106,20 +114,60 @@ def edit_total_flow_value(new_value):
         total_flow_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(5) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(8) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
             ))
         )
         total_flow_input.clear()
         time.sleep(0.5)
-        browser.execute_script(
-            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
-            total_flow_input
-        )
+        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", total_flow_input)
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
         print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
     except Exception as e:
         print("خطا در تغییر مقدار 'Total Flow':", e)
+
+def click_reset_traffic():
+    try:
+        print("در حال یافتن دکمه 'Reset Traffic' با استفاده از XPath نسبی بر اساس 'Usage'...")
+        reset_button = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Usage')]]//i"
+            ))
+        )
+        print("دکمه 'Reset Traffic' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
+        browser.execute_script("arguments[0].click();", reset_button)
+        print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
+        time.sleep(2)
+        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
+        take_full_page_screenshot(browser, reset_screenshot_path)
+        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
+        error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات 'Reset Traffic' ذخیره شد در:", error_screenshot)
+
+def click_reset_confirmation_and_capture():
+    try:
+        print("در حال انتظار برای نمایش پنجره تایید Reset Traffic...")
+        # منتظر می‌شویم تا پنجره تایید ظاهر شود؛ استفاده از یک XPath تقریبی برای یافتن متن تایید
+        confirmation = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
+            )
+        )
+        print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
+        ActionChains(browser).send_keys(Keys.ENTER).perform()
+        time.sleep(2)
+        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
+        take_full_page_screenshot(browser, confirm_screenshot_path)
+        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
+    except Exception as e:
+        print("خطا در عملیات تایید Reset Traffic:", e)
+        error_screenshot = os.path.join("/root/Screen/", "reset_confirm_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
 def edit_client_window_and_capture():
     try:
@@ -131,6 +179,9 @@ def edit_client_window_and_capture():
         print("در حال تغییر مقدار 'Total Flow'...")
         edit_total_flow_value("7")
         time.sleep(2)
+        click_reset_traffic()
+        # بعد از کلیک روی Reset Traffic، تایید را انجام می‌دهیم
+        click_reset_confirmation_and_capture()
         after_path = os.path.join("/root/Screen/", "edit_client_after.png")
         take_full_page_screenshot(browser, after_path)
         print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
@@ -142,9 +193,10 @@ def toggle_start_after_first_use_and_capture():
         print("در حال یافتن دکمه 'Start After First Use' با استفاده از CSS Selector داده‌شده...")
         btn = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(7) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > button")
+                (By.CSS_SELECTOR, "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(10) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > button")
             )
         )
+        browser.execute_script("arguments[0].scrollIntoView(true);", btn)
         state = btn.get_attribute("aria-pressed")
         if state is None:
             classes = btn.get_attribute("class")
@@ -171,7 +223,7 @@ def update_duration_field_by_selector(new_value="23"):
         duration_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(8) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(11) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
             ))
         )
         print("فیلد 'Duration' پیدا شد. در حال پاکسازی مقدار قبلی...")
@@ -193,6 +245,7 @@ def save_changes_and_capture():
                 "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > div > button.ant-btn.ant-btn-primary"
             ))
         )
+        browser.execute_script("arguments[0].scrollIntoView(true);", save_button)
         print("دکمه 'Save Changes' پیدا شد. در حال کلیک روی آن...")
         browser.execute_script("arguments[0].click();", save_button)
         print("کلیک روی دکمه 'Save Changes' انجام شد.")
@@ -216,14 +269,16 @@ print("مرورگر راه‌اندازی شد.")
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
+# ابتدا کلاینت جستجو شود
+search_client_and_capture("d50b2647-e8f6-4ea3-8bc9-6ad11b84241b")
+# سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
-search_client_and_capture("d83cf6f7-1afb-4fbf-a26f-ed4f66323289")
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
 click_edit_client_button_and_capture()
 edit_client_window_and_capture()
-print("تا اینجا عملیات در پنجره 'Edit Client' انجام شده. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
+print("تا اینجا عملیات در پنجره 'Edit Client' انجام شد. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
 toggle_start_after_first_use_and_capture()
 print("تا اینجا عملیات ویرایش پنجره 'Edit Client' انجام شد. اکنون به مرحله تغییر مقدار فیلد 'Duration' می‌رویم.")
 update_duration_field_by_selector("23")
