@@ -181,6 +181,7 @@ def click_reset_confirmation_and_capture():
         print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
 
+# *****************  پارت دوم  ****************************
 
 def edit_client_window_and_capture(): # مربوط به اسکرین شات گرفتن از ثبل و بعد مرحله "Total Flow"
     try:
