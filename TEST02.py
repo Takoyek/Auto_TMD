@@ -14,10 +14,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # متغیرهای سراسری
 CLIENT_NAME = "نسیم.اقدام.a12"
-TOTAL_FLOW  = "71"
-DURATION    = "91"
+TOTAL_FLOW  = "999"
+DURATION    = "888"
 WAIT_TIME   = 1
-BASE_URL    = "http://37.27.253.117:2095"
+BASE_URL    = "http://tmd.taino.top:2095/"
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
@@ -33,17 +33,29 @@ def take_full_page_screenshot(browser, save_path):
     print("تصویر نهایی با ابعاد 1080x720 ذخیره شد.")
 
 def login_to_panel(username, password):
-    print("در حال ورود به پنل...")
-    browser.get(BASE_URL)
-    time.sleep(WAIT_TIME)
-    print("در حال یافتن فیلدهای نام کاربری و رمز عبور...")
-    username_field = browser.find_element(By.NAME, 'username')
-    password_field = browser.find_element(By.NAME, 'password')
-    username_field.send_keys(username)
-    password_field.send_keys(password)
-    password_field.send_keys(Keys.RETURN)
-    time.sleep(WAIT_TIME + 1)
-    print("ورود به پنل انجام شد. آدرس فعلی:", browser.current_url)
+    try:
+        print("در حال ورود به پنل...")
+        browser.get(BASE_URL)
+        time.sleep(WAIT_TIME)
+        print("در حال یافتن فیلدهای نام کاربری و رمز عبور...")
+        username_field = browser.find_element(By.NAME, 'username')
+        password_field = browser.find_element(By.NAME, 'password')
+        username_field.clear()
+        password_field.clear()
+        username_field.send_keys(username)
+        password_field.send_keys(password)
+        password_field.send_keys(Keys.RETURN)
+        time.sleep(WAIT_TIME + 1)
+        # بررسی می‌کنیم که ورود موفق بوده یا خیر؛ به عنوان مثال اگر در URL تغییر نکرده باشد یا المان خطا بشناسیم.
+        if "login" in browser.current_url.lower():
+            raise Exception("ورود با خطا مواجه شد.")  
+        print("ورود به پنل انجام شد. آدرس فعلی:", browser.current_url)
+    except Exception as e:
+        print("خطا در ورود به پنل:", e)
+        error_screenshot = os.path.join("/root/Screen/", "login_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در ورود به پنل ذخیره شد در:", error_screenshot)
+
 
 def click_inbounds():
     print("در حال جستجوی دکمه 'Inbounds'...")
@@ -72,10 +84,11 @@ def search_client_and_capture(client_name):
     search_input.send_keys(client_name)
     search_input.send_keys(Keys.RETURN)
     print(f"نام کلاینت '{client_name}' ارسال شد. در حال جستجو...")
-    time.sleep(WAIT_TIME + 1)
-    full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
-    take_full_page_screenshot(browser, full_search_screenshot)
-    print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+    time.sleep(WAIT_TIME)
+    # full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
+    # take_full_page_screenshot(browser, full_search_screenshot)
+    # print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+
 
 def expand_all_inbound_rows():
     print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
@@ -119,7 +132,7 @@ def click_exact_edit_client():
 
 def edit_total_flow_value(new_value):
     try:
-        print("در حال یافتن فیلد 'Total Flow' با استفاده از XPath نسبی...")
+        print("در حال یافتن فیلد 'Total Flow' ")
         total_flow_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -151,9 +164,9 @@ def click_reset_traffic():
         browser.execute_script("arguments[0].click();", reset_button)
         print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
         time.sleep(WAIT_TIME)
-        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
-        take_full_page_screenshot(browser, reset_screenshot_path)
-        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
+#        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
+#        take_full_page_screenshot(browser, reset_screenshot_path)
+#        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
         error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
@@ -171,14 +184,11 @@ def click_reset_confirmation_and_capture():
         print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
         ActionChains(browser).send_keys(Keys.ENTER).perform()
         time.sleep(WAIT_TIME)
-        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
-        take_full_page_screenshot(browser, confirm_screenshot_path)
-        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
+#        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
+#        take_full_page_screenshot(browser, confirm_screenshot_path)
+#        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
     except Exception as e:
         print("خطا در عملیات تایید Reset Traffic:", e)
-        error_screenshot = os.path.join("/root/Screen/", "reset_confirm_error.png")
-        take_full_page_screenshot(browser, error_screenshot)
-        print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
 
 # ------------------  پارت دوم  ------------------
@@ -186,7 +196,7 @@ def click_reset_confirmation_and_capture():
 def edit_client_window_and_capture():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
-        time.sleep(WAIT_TIME + 1)
+        time.sleep(WAIT_TIME)
         before_path = os.path.join("/root/Screen/", "edit_client_before.png")
         take_full_page_screenshot(browser, before_path)
         print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_path)
@@ -195,15 +205,15 @@ def edit_client_window_and_capture():
         time.sleep(WAIT_TIME)
         click_reset_traffic()
         click_reset_confirmation_and_capture()
-        after_path = os.path.join("/root/Screen/", "edit_client_after.png")
-        take_full_page_screenshot(browser, after_path)
-        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
+#        after_path = os.path.join("/root/Screen/", "edit_client_after.png")
+#        take_full_page_screenshot(browser, after_path)
+#        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
     except Exception as e:
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
 def toggle_start_after_first_use_and_capture():
     try:
-        print("در حال یافتن دکمه 'Start After First Use' با استفاده از XPath نسبی...")
+        print("در حال یافتن دکمه 'Start After First Use' ")
         btn = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -225,9 +235,9 @@ def toggle_start_after_first_use_and_capture():
             time.sleep(WAIT_TIME)
         else:
             print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
-        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
-        take_full_page_screenshot(browser, screenshot_path)
-        print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
+#        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
+#        take_full_page_screenshot(browser, screenshot_path)
+#        print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
     except Exception as e:
         print("خطا در عملیات تغییر وضعیت دکمه 'Start After First Use':", e)
 
@@ -235,7 +245,7 @@ def update_duration_field_by_selector(new_value=None):
     if new_value is None:
         new_value = DURATION
     try:
-        print("در حال یافتن فیلد 'Duration' با استفاده از XPath نسبی...")
+        print("در حال یافتن فیلد 'Duration' ")
         duration_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -249,8 +259,14 @@ def update_duration_field_by_selector(new_value=None):
         time.sleep(0.5)
         duration_input.send_keys(new_value)
         print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
+        
+        # گرفتن اسکرین‌شات پس از به‌روزرسانی فیلد Duration
+        screenshot_path = os.path.join("/root/Screen/", "duration_updated.png")
+        take_full_page_screenshot(browser, screenshot_path)
+        print("اسکرین‌شات از فیلد Duration به‌روز شده در مسیر ذخیره شد:", screenshot_path)
     except Exception as e:
         print("خطا در به‌روز کردن فیلد 'Duration':", e)
+
 
 def save_changes_and_capture():
     try:
