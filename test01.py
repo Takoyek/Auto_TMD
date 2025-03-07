@@ -12,10 +12,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
+# متغیرهای سراسری
 CLIENT_NAME = "نسیم.اقدام.a12"
-TOTAL_FLOW = "71"
-DURATION   = "91"
-WAIT_TIME  = 1
+TOTAL_FLOW  = "71"
+DURATION    = "91"
+WAIT_TIME   = 1
+BASE_URL    = "http://37.27.253.117:2095"
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
@@ -32,7 +34,7 @@ def take_full_page_screenshot(browser, save_path):
 
 def login_to_panel(username, password):
     print("در حال ورود به پنل...")
-    browser.get('http://37.27.253.117:2095')
+    browser.get(BASE_URL)
     time.sleep(WAIT_TIME)
     print("در حال یافتن فیلدهای نام کاربری و رمز عبور...")
     username_field = browser.find_element(By.NAME, 'username')
