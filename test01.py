@@ -91,22 +91,26 @@ def expand_all_inbound_rows():
         print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
 
 
-def click_edit_client_button_and_capture():
+def click_exact_edit_client():
     try:
-        print("در حال یافتن دکمه 'Edit Client' با استفاده از CSS Selector...")
-        wait = WebDriverWait(browser, 10)
-        edit_elem = wait.until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit"))
-        )
-        print("عنصر دکمه 'Edit Client' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
-        browser.execute_script("arguments[0].click();", edit_elem)
-        print("کلیک روی دکمه 'Edit Client' انجام شد.")
-        time.sleep(5)
-        result_screenshot_path = os.path.join("/root/Screen/", "edit_client_result.png")
-        take_full_page_screenshot(browser, result_screenshot_path)
-        print("اسکرین‌شات نتیجه 'Edit Client' در مسیر ذخیره شد:", result_screenshot_path)
+        print("در حال پیدا کردن رکورد دقیق 'FM' و کلیک روی دکمه 'Edit Client' مربوط به آن...")
+        rows = browser.find_elements(By.XPATH, "//tr[contains(@class, 'ant-table-row')]")
+        for row in rows:
+            try:
+                # با استفاده از normalize-space مطمئن می‌شویم که مقدار سلول دقیقا برابر با 'FM' است.
+                cell = row.find_element(By.XPATH, ".//td[normalize-space(text())='FM']")
+                if cell:
+                    edit_btn = row.find_element(By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
+                    browser.execute_script("arguments[0].click();", edit_btn)
+                    print("دکمه 'Edit Client' مربوط به رکورد دقیق 'FM' کلیک شد.")
+                    return
+            except Exception as inner_e:
+                continue
+        print("ردیف دقیق 'FM' پیدا نشد!")
     except Exception as e:
-        print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
+        print("خطا در انتخاب دقیق 'FM' و کلیک روی Edit Client:", e)
+
+
 
 def edit_total_flow_value(new_value):
     try:
@@ -289,13 +293,13 @@ login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 # ابتدا کلاینت جستجو شود
-search_client_and_capture("929b7245-354a-4ada-97f1-1a447a4ecd9a")
+search_client_and_capture("FM")
 # سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
-click_edit_client_button_and_capture()
+click_exact_edit_client()
 edit_client_window_and_capture()
 print("تا اینجا عملیات در پنجره 'Edit Client' انجام شد. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
 toggle_start_after_first_use_and_capture()

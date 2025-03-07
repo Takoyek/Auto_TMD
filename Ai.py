@@ -53,6 +53,7 @@ def click_inbounds():
     time.sleep(5)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
 
+
 def search_client_and_capture(client_name):
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
@@ -68,6 +69,7 @@ def search_client_and_capture(client_name):
     full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+
 
 def expand_all_inbound_rows():
     print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
@@ -87,44 +89,53 @@ def expand_all_inbound_rows():
         print("تمامی زیرمجموعه‌های اینباند باز شدند.")
     except Exception as e:
         print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
-    full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
-    take_full_page_screenshot(browser, full_screenshot_path)
-    print("اسکرین‌شات کامل باز کردن زیرمجموعه‌های اینباند ذخیره شد در:", full_screenshot_path)
 
-def click_edit_client_button_and_capture():
+
+def click_exact_edit_client():
     try:
-        print("در حال یافتن دکمه 'Edit Client' با استفاده از CSS Selector...")
-        wait = WebDriverWait(browser, 10)
-        edit_elem = wait.until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit"))
-        )
-        print("عنصر دکمه 'Edit Client' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
-        browser.execute_script("arguments[0].click();", edit_elem)
-        print("کلیک روی دکمه 'Edit Client' انجام شد.")
-        time.sleep(5)
-        result_screenshot_path = os.path.join("/root/Screen/", "edit_client_result.png")
-        take_full_page_screenshot(browser, result_screenshot_path)
-        print("اسکرین‌شات نتیجه 'Edit Client' در مسیر ذخیره شد:", result_screenshot_path)
+        print("در حال پیدا کردن رکورد دقیق 'FM' و کلیک روی دکمه 'Edit Client' مربوط به آن...")
+        rows = browser.find_elements(By.XPATH, "//tr[contains(@class, 'ant-table-row')]")
+        for row in rows:
+            try:
+                # با استفاده از normalize-space مطمئن می‌شویم که مقدار سلول دقیقا برابر با 'FM' است.
+                cell = row.find_element(By.XPATH, ".//td[normalize-space(text())='FM']")
+                if cell:
+                    edit_btn = row.find_element(By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
+                    browser.execute_script("arguments[0].click();", edit_btn)
+                    print("دکمه 'Edit Client' مربوط به رکورد دقیق 'FM' کلیک شد.")
+                    return
+            except Exception as inner_e:
+                continue
+        print("ردیف دقیق 'FM' پیدا نشد!")
     except Exception as e:
-        print("خطا در عملیات کلیک روی دکمه 'Edit Client' یا در گرفتن اسکرین‌شات:", e)
+        print("خطا در انتخاب دقیق 'FM' و کلیک روی Edit Client:", e)
+
+
 
 def edit_total_flow_value(new_value):
     try:
-        print("در حال یافتن فیلد 'Total Flow' با استفاده از CSS Selector...")
+        print("در حال یافتن فیلد 'Total Flow' با استفاده از XPath نسبی...")
         total_flow_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
-                By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(8) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+                By.XPATH,
+                "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Total Flow')]]//input"
             ))
         )
+        # پاکسازی اولیه با استفاده از clear()
         total_flow_input.clear()
         time.sleep(0.5)
-        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", total_flow_input)
+        # استفاده از JavaScript برای پاکسازی قطعی مقدار و به‌روز کردن وضعیت داخلی (dispatch event)
+        browser.execute_script(
+            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
+            total_flow_input
+        )
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
         print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
     except Exception as e:
         print("خطا در تغییر مقدار 'Total Flow':", e)
+
+
 
 def click_reset_traffic():
     try:
@@ -169,7 +180,9 @@ def click_reset_confirmation_and_capture():
         take_full_page_screenshot(browser, error_screenshot)
         print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
-def edit_client_window_and_capture():
+
+
+def edit_client_window_and_capture(): # مربوط به اسکرین شات گرفتن از ثبل و بعد مرحله "Total Flow"
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
         time.sleep(3)
@@ -190,13 +203,16 @@ def edit_client_window_and_capture():
 
 def toggle_start_after_first_use_and_capture():
     try:
-        print("در حال یافتن دکمه 'Start After First Use' با استفاده از CSS Selector داده‌شده...")
+        print("در حال یافتن دکمه 'Start After First Use' با استفاده از XPath نسبی...")
         btn = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(10) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > button")
-            )
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Start After First Use')]]//button"
+            ))
         )
         browser.execute_script("arguments[0].scrollIntoView(true);", btn)
+        
+        # بررسی وضعیت دکمه به وسیله‌ی attribute "aria-pressed" یا کلاس.
         state = btn.get_attribute("aria-pressed")
         if state is None:
             classes = btn.get_attribute("class")
@@ -205,36 +221,43 @@ def toggle_start_after_first_use_and_capture():
             else:
                 state = "false"
         print("وضعیت اولیه دکمه 'Start After First Use' برابر است با:", state)
+        
         if state.lower() != "true":
             print("دکمه در حالت خاموش است. در حال کلیک جهت فعال‌سازی...")
             btn.click()
             time.sleep(2)
         else:
             print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
+        
         screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
         take_full_page_screenshot(browser, screenshot_path)
         print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
     except Exception as e:
         print("خطا در عملیات تغییر وضعیت دکمه 'Start After First Use':", e)
 
+
 def update_duration_field_by_selector(new_value="23"):
     try:
-        print("در حال یافتن فیلد 'Duration' با استفاده از CSS Selector داده‌شده...")
+        print("در حال یافتن فیلد 'Duration' با استفاده از XPath نسبی...")
         duration_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
-                By.CSS_SELECTOR,
-                "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-body > form > div:nth-child(11) > div.ant-col.ant-col-md-14.ant-form-item-control-wrapper > div > span > div > div.ant-input-number-input-wrap > input"
+                By.XPATH,
+                "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Duration')]]//input"
             ))
         )
         print("فیلد 'Duration' پیدا شد. در حال پاکسازی مقدار قبلی...")
         duration_input.clear()
         time.sleep(0.5)
-        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", duration_input)
+        browser.execute_script(
+            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
+            duration_input
+        )
         time.sleep(0.5)
         duration_input.send_keys(new_value)
         print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
     except Exception as e:
         print("خطا در به‌روز کردن فیلد 'Duration':", e)
+
 
 def save_changes_and_capture():
     try:
@@ -270,13 +293,13 @@ login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(2)
 # ابتدا کلاینت جستجو شود
-search_client_and_capture("d50b2647-e8f6-4ea3-8bc9-6ad11b84241b")
+search_client_and_capture("FM")
 # سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
 print("تا اینجا عملیات باز کردن زیرمجموعه‌ها و جستجوی کلاینت به پایان رسید. اکنون در مرحله 'Edit Client' هستیم.")
-click_edit_client_button_and_capture()
+click_exact_edit_client()
 edit_client_window_and_capture()
 print("تا اینجا عملیات در پنجره 'Edit Client' انجام شد. اکنون در مرحله تغییر وضعیت 'Start After First Use' هستیم.")
 toggle_start_after_first_use_and_capture()
