@@ -395,9 +395,35 @@ toggle_start_after_first_use_and_capture
 
 لازم به ذکر است بعد از کلیک بر روی دکمه  "Reset" اسکرین شات باید بگیرد. حتی اگر نتوانست دکمه  "Reset" را پیدا کند، باز هم اسکرین شات بگیرد قبل از اینکه به مرحله بعدی برود تا من با تماشای اسکرین شات متوجه بشوم مشکل از کجاست.
 ------------------------------------------------------
+حالا یک مشکلی که دارم این است که هر بار میخواهم مقدار "FM" را تغییر بدهم باید چندین قسمت را تغییر بدهم و این کار سخت است.
+برای مقدار "Total Flow" و  "Duration" نیز همین مشکل را دارم.
+میتوانی یک قسمتی را ایجاد کنی که در آن:
+"Client Name:"
+"Total Flow:" 
+"Duration:"
+را درون کد وارد کنم؟ منظورم این نیست که در ترمینال این مقادیر را از من سوال کند، بلکه در خود کد این سه قسمت را وارد کنم.
 
 ------------------------------------------------------
+def click_exact_edit_client():
+    try:
+        print("در حال پیدا کردن رکورد دقیق 'FM' و کلیک روی دکمه 'Edit Client' مربوط به آن...")
+        rows = browser.find_elements(By.XPATH, "//tr[contains(@class, 'ant-table-row')]")
+        for row in rows:
+            try:
+                cell = row.find_element(By.XPATH, ".//td[normalize-space(text())='FM']")
+                if cell:
+                    edit_btn = row.find_element(By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
+                    browser.execute_script("arguments[0].click();", edit_btn)
+                    print("دکمه 'Edit Client' مربوط به رکورد دقیق 'FM' کلیک شد.")
+                    return
+            except Exception as inner_e:
+                continue
+        print("ردیف دقیق 'FM' پیدا نشد!")
+    except Exception as e:
+        print("خطا در انتخاب دقیق 'FM' و کلیک روی Edit Client:", e)
 
+در تابع بالا همچنان باید "FM" را خط به خط تغییر دهم.
+این تابع را هم کاری کن از "CLIENT_NAME =" استفاده نماید.
 ------------------------------------------------------
 
 ------------------------------------------------------
