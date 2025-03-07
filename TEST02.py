@@ -1,4 +1,5 @@
 import os
+import shutil
 import math
 import time
 from PIL import Image
@@ -11,11 +12,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
-# متغیرهای سراسری
-CLIENT_NAME = "نسیم.اقدام.a12"          # برای تغییر مقدار کلاینت کافی است این متغیر تغییر یابد.
-TOTAL_FLOW = "50"            # مقدار مورد نظر برای فیلد Total Flow
-DURATION   = "30"           # مقدار مورد نظر برای فیلد Duration
-WAIT_TIME  = 1              # زمان انتظار عمومی (ثانیه)
+CLIENT_NAME = "نسیم.اقدام.a12"
+TOTAL_FLOW = "71"
+DURATION   = "91"
+WAIT_TIME  = 1
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
@@ -178,6 +178,9 @@ def click_reset_confirmation_and_capture():
         take_full_page_screenshot(browser, error_screenshot)
         print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
+
+# ------------------  پارت دوم  ------------------
+
 def edit_client_window_and_capture():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
@@ -268,6 +271,13 @@ def save_changes_and_capture():
         print("خطا در عملیات کلیک روی دکمه 'Save Changes' یا گرفتن اسکرین‌شات:", e)
 
 # ------------------ Main Program ------------------
+
+screen_dir = "/root/Screen/"
+if os.path.exists(screen_dir):
+    shutil.rmtree(screen_dir)
+os.makedirs(screen_dir)
+print("محتویات فایل Screen حذف شد.")
+
 print("در حال راه‌اندازی مرورگر...")
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
@@ -280,9 +290,7 @@ print("مرورگر راه‌اندازی شد.")
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(WAIT_TIME)
-# ابتدا کلاینت جستجو شود
 search_client_and_capture(CLIENT_NAME)
-# سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
