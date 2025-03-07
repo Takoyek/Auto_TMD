@@ -11,15 +11,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
-
-CLIENT_NAME = "متانت"
-TOTAL_FLOW = "14"
-DURATION   = "56"
+# متغیرهای سراسری
+CLIENT_NAME = "نسیم.اقدام.a12"          # برای تغییر مقدار کلاینت کافی است این متغیر تغییر یابد.
+TOTAL_FLOW = "50"            # مقدار مورد نظر برای فیلد Total Flow
+DURATION   = "30"           # مقدار مورد نظر برای فیلد Duration
+WAIT_TIME  = 1              # زمان انتظار عمومی (ثانیه)
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
     browser.execute_script("document.body.style.zoom='50%'")
-    time.sleep(2)
+    time.sleep(WAIT_TIME)
     print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
     print("اسکرین‌شات صفحه ذخیره شد:", save_path)
@@ -32,14 +33,14 @@ def take_full_page_screenshot(browser, save_path):
 def login_to_panel(username, password):
     print("در حال ورود به پنل...")
     browser.get('http://37.27.253.117:2095')
-    time.sleep(2)
+    time.sleep(WAIT_TIME)
     print("در حال یافتن فیلدهای نام کاربری و رمز عبور...")
     username_field = browser.find_element(By.NAME, 'username')
     password_field = browser.find_element(By.NAME, 'password')
     username_field.send_keys(username)
     password_field.send_keys(password)
     password_field.send_keys(Keys.RETURN)
-    time.sleep(5)
+    time.sleep(WAIT_TIME + 1)
     print("ورود به پنل انجام شد. آدرس فعلی:", browser.current_url)
 
 def click_inbounds():
@@ -55,7 +56,7 @@ def click_inbounds():
             inbound_element.click()
     except Exception as e:
         print("خطا در یافتن دکمه Inbounds:", e)
-    time.sleep(5)
+    time.sleep(WAIT_TIME + 1)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
 
 def search_client_and_capture(client_name):
@@ -69,7 +70,7 @@ def search_client_and_capture(client_name):
     search_input.send_keys(client_name)
     search_input.send_keys(Keys.RETURN)
     print(f"نام کلاینت '{client_name}' ارسال شد. در حال جستجو...")
-    time.sleep(3)
+    time.sleep(WAIT_TIME + 1)
     full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
     take_full_page_screenshot(browser, full_search_screenshot)
     print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
@@ -114,7 +115,6 @@ def click_exact_edit_client():
     except Exception as e:
         print("خطا در انتخاب دقیق '{}' و کلیک روی Edit Client:".format(CLIENT_NAME), e)
 
-
 def edit_total_flow_value(new_value):
     try:
         print("در حال یافتن فیلد 'Total Flow' با استفاده از XPath نسبی...")
@@ -126,7 +126,10 @@ def edit_total_flow_value(new_value):
         )
         total_flow_input.clear()
         time.sleep(0.5)
-        browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", total_flow_input)
+        browser.execute_script(
+            "arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", 
+            total_flow_input
+        )
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
         print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
@@ -145,7 +148,7 @@ def click_reset_traffic():
         print("دکمه 'Reset Traffic' پیدا شد. در حال کلیک روی آن با استفاده از JavaScript...")
         browser.execute_script("arguments[0].click();", reset_button)
         print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
-        time.sleep(2)
+        time.sleep(WAIT_TIME)
         reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
         take_full_page_screenshot(browser, reset_screenshot_path)
         print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
@@ -165,7 +168,7 @@ def click_reset_confirmation_and_capture():
         )
         print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
         ActionChains(browser).send_keys(Keys.ENTER).perform()
-        time.sleep(2)
+        time.sleep(WAIT_TIME)
         confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
         take_full_page_screenshot(browser, confirm_screenshot_path)
         print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
@@ -178,13 +181,13 @@ def click_reset_confirmation_and_capture():
 def edit_client_window_and_capture():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
-        time.sleep(3)
+        time.sleep(WAIT_TIME + 1)
         before_path = os.path.join("/root/Screen/", "edit_client_before.png")
         take_full_page_screenshot(browser, before_path)
         print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_path)
         print("در حال تغییر مقدار 'Total Flow'...")
         edit_total_flow_value(TOTAL_FLOW)
-        time.sleep(2)
+        time.sleep(WAIT_TIME)
         click_reset_traffic()
         click_reset_confirmation_and_capture()
         after_path = os.path.join("/root/Screen/", "edit_client_after.png")
@@ -214,7 +217,7 @@ def toggle_start_after_first_use_and_capture():
         if state.lower() != "true":
             print("دکمه در حالت خاموش است. در حال کلیک جهت فعال‌سازی...")
             btn.click()
-            time.sleep(2)
+            time.sleep(WAIT_TIME)
         else:
             print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
         screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
@@ -244,7 +247,6 @@ def update_duration_field_by_selector(new_value=None):
     except Exception as e:
         print("خطا در به‌روز کردن فیلد 'Duration':", e)
 
-
 def save_changes_and_capture():
     try:
         print("در حال یافتن دکمه 'Save Changes' با استفاده از CSS Selector داده‌شده...")
@@ -258,7 +260,7 @@ def save_changes_and_capture():
         print("دکمه 'Save Changes' پیدا شد. در حال کلیک روی آن...")
         browser.execute_script("arguments[0].click();", save_button)
         print("کلیک روی دکمه 'Save Changes' انجام شد.")
-        time.sleep(5)
+        time.sleep(WAIT_TIME + 1)
         final_save_path = os.path.join("/root/Screen/", "save_changes_result.png")
         take_full_page_screenshot(browser, final_save_path)
         print("اسکرین‌شات وضعیت نهایی پس از ذخیره تغییرات در مسیر ذخیره شد:", final_save_path)
@@ -277,8 +279,10 @@ print("مرورگر راه‌اندازی شد.")
 
 login_to_panel('msi', 'msi')
 click_inbounds()
-time.sleep(2)
+time.sleep(WAIT_TIME)
+# ابتدا کلاینت جستجو شود
 search_client_and_capture(CLIENT_NAME)
+# سپس زیرمجموعه‌های اینباند باز شوند
 expand_all_inbound_rows()
 full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
 take_full_page_screenshot(browser, full_screenshot_path)
