@@ -13,30 +13,26 @@ from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 CLIENT_NAME = "Nadia-New"
-TOTAL_FLOW  = "999"
-DURATION    = "888"
+TOTAL_FLOW  = "666"
+DURATION    = "777"
 WAIT_TIME   = 1
 BASE_URL    = "http://tmd.taino.top:2095/"
 
 def take_full_page_screenshot(browser, save_path):
-    print("در حال تغییر سطح zoom صفحه به 50%...")
-    browser.execute_script("document.body.style.zoom='50%'")
-    time.sleep(WAIT_TIME)
-    print("در حال گرفتن اسکرین‌شات صفحه...")
     browser.save_screenshot(save_path)
     print("اسکرین‌شات صفحه ذخیره شد:", save_path)
-    print("در حال تغییر اندازه تصویر نهایی به 1080x720...")
     final_image = Image.open(save_path)
-    final_image = final_image.resize((1080, 720), Image.LANCZOS)
+    final_image = final_image.resize((1280, 720), Image.LANCZOS)
     final_image.save(save_path)
-    print("تصویر نهایی با ابعاد 1080x720 ذخیره شد.")
 
 def login_to_panel(username, password):
+    print("Zoom to 50%")
+    browser.execute_script("document.body.style.zoom='50%'")
     try:
         print("در حال ورود به پنل...")
         browser.get(BASE_URL)
         
-        WebDriverWait(browser, 10).until(
+        WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((By.NAME, "username"))
         )
         
@@ -50,7 +46,7 @@ def login_to_panel(username, password):
         password_field.send_keys(password)
         password_field.send_keys(Keys.RETURN)
         
-        WebDriverWait(browser, 10).until(lambda driver: "panel" in driver.current_url.lower())
+        WebDriverWait(browser, 5).until(lambda driver: "panel" in driver.current_url.lower())
         
         if "login" in browser.current_url.lower():
             raise Exception("ورود با خطا مواجه شد.")  
@@ -65,7 +61,7 @@ def login_to_panel(username, password):
 def click_inbounds():
     print("در حال جستجوی دکمه 'Inbounds' با استفاده از XPath نسبی...")
     try:
-        inbound_button = WebDriverWait(browser, 10).until(
+        inbound_button = WebDriverWait(browser, 5).until(
             EC.element_to_be_clickable((By.XPATH, "//b[text()='Inbounds']/.."))
         )
         print("دکمه Inbounds پیدا شد. در حال اسکرول به سمت آن...")
@@ -79,9 +75,11 @@ def click_inbounds():
 
 
 def search_client_and_capture(client_name):
+    print("Zoom to 50%")
+    browser.execute_script("document.body.style.zoom='50%'")
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
-        search_input = WebDriverWait(browser, 10).until(
+        search_input = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Search']"))
         )
     except Exception as e:
@@ -96,7 +94,6 @@ def search_client_and_capture(client_name):
     print(f"نام کلاینت '{client_name}' ارسال شد. در حال جستجو...")
     
     time.sleep(WAIT_TIME)
-    # در صورت نیاز می‌توانید اسکرین‌شات نتایج را نیز ذخیره کنید:
     # full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
     # take_full_page_screenshot(browser, full_search_screenshot)
     # print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
@@ -106,7 +103,7 @@ def search_client_and_capture(client_name):
 def expand_all_inbound_rows():
     print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
     try:
-        expand_buttons = WebDriverWait(browser, 10).until(
+        expand_buttons = WebDriverWait(browser, 5).until(
             EC.presence_of_all_elements_located((
                 By.XPATH, 
                 "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
@@ -125,7 +122,7 @@ def expand_all_inbound_rows():
         print("تمامی زیرمجموعه‌های اینباند باز شدند.")
     except Exception as e:
         print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
-    
+
     full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
     take_full_page_screenshot(browser, full_screenshot_path)
     print("اسکرین‌شات کامل باز کردن زیرمجموعه‌های اینباند ذخیره شد در:", full_screenshot_path)
@@ -135,7 +132,7 @@ def click_exact_edit_client():
     try:
         print("در حال پیدا کردن رکورد دقیق '{}' و کلیک روی دکمه 'Edit Client' مربوط به آن...".format(CLIENT_NAME))
         
-        rows = WebDriverWait(browser, 10).until(
+        rows = WebDriverWait(browser, 5).until(
             EC.presence_of_all_elements_located((By.XPATH, "//tr[contains(@class, 'ant-table-row')]"))
         )
         
@@ -160,7 +157,7 @@ def click_exact_edit_client():
 def edit_total_flow_value(new_value):
     try:
         print("در حال یافتن فیلد 'Total Flow' ")
-        total_flow_input = WebDriverWait(browser, 10).until(
+        total_flow_input = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Total Flow')]]//input"
@@ -181,7 +178,7 @@ def edit_total_flow_value(new_value):
 def click_reset_traffic():
     try:
         print("در حال یافتن دکمه 'Reset Traffic' با استفاده از XPath نسبی بر اساس 'Usage'...")
-        reset_button = WebDriverWait(browser, 10).until(
+        reset_button = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Usage')]]//i"
@@ -203,7 +200,7 @@ def click_reset_traffic():
 def click_reset_confirmation_and_capture():
     try:
         print("در حال انتظار برای نمایش پنجره تایید Reset Traffic...")
-        confirmation = WebDriverWait(browser, 10).until(
+        confirmation = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located(
                 (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
             )
@@ -256,7 +253,7 @@ def edit_client_window_and_capture():
 def toggle_start_after_first_use_and_capture():
     try:
         print("در حال یافتن دکمه 'Start After First Use' ")
-        btn = WebDriverWait(browser, 10).until(
+        btn = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Start After First Use')]]//button"
@@ -288,7 +285,7 @@ def update_duration_field_by_selector(new_value=None):
         new_value = DURATION
     try:
         print("در حال یافتن فیلد 'Duration' ")
-        duration_input = WebDriverWait(browser, 10).until(
+        duration_input = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//div[contains(@class, 'ant-form-item') and .//*[contains(text(), 'Duration')]]//input"
@@ -313,7 +310,7 @@ def update_duration_field_by_selector(new_value=None):
 def save_changes_and_capture():
     try:
         print("در حال یافتن دکمه 'Save Changes' با استفاده از CSS Selector داده‌شده...")
-        save_button = WebDriverWait(browser, 10).until(
+        save_button = WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR,
                 "#client-modal > div.ant-modal-wrap > div > div.ant-modal-content > div.ant-modal-footer > div > button.ant-btn.ant-btn-primary"
