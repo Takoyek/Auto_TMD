@@ -12,7 +12,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
-# متغیرهای سراسری
 CLIENT_NAME = "Nadia-New"
 TOTAL_FLOW  = "999"
 DURATION    = "888"
@@ -37,7 +36,6 @@ def login_to_panel(username, password):
         print("در حال ورود به پنل...")
         browser.get(BASE_URL)
         
-        # انتظار تا فیلد نام کاربری قابل دسترس شود؛ 
         WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((By.NAME, "username"))
         )
@@ -52,7 +50,6 @@ def login_to_panel(username, password):
         password_field.send_keys(password)
         password_field.send_keys(Keys.RETURN)
         
-        # انتظار برای تغییر صفحه؛ به جای time.sleep از شرطی استفاده می‌کنیم که بررسی کند صفحه به پنل منتقل شده است
         WebDriverWait(browser, 10).until(lambda driver: "panel" in driver.current_url.lower())
         
         if "login" in browser.current_url.lower():
@@ -68,7 +65,6 @@ def login_to_panel(username, password):
 def click_inbounds():
     print("در حال جستجوی دکمه 'Inbounds' با استفاده از XPath نسبی...")
     try:
-        # استفاده از WebDriverWait برای اطمینان از قابل کلیک بودن دکمه Inbounds
         inbound_button = WebDriverWait(browser, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//b[text()='Inbounds']/.."))
         )
@@ -92,7 +88,6 @@ def search_client_and_capture(client_name):
         print("خطا در یافتن فیلد جستجو:", e)
         return
 
-    # اطمینان از دیده شدن المان
     browser.execute_script("arguments[0].scrollIntoView(true);", search_input)
     
     search_input.clear()
@@ -111,7 +106,6 @@ def search_client_and_capture(client_name):
 def expand_all_inbound_rows():
     print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
     try:
-        # انتظار برای حضور تمام دکمه‌های Expand
         expand_buttons = WebDriverWait(browser, 10).until(
             EC.presence_of_all_elements_located((
                 By.XPATH, 
@@ -120,10 +114,8 @@ def expand_all_inbound_rows():
         )
         print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
         
-        # تکرار برای کلیک روی هر دکمه
         for btn in expand_buttons:
             try:
-                # اسکرول کردن به سمت دکمه
                 browser.execute_script("arguments[0].scrollIntoView(true);", btn)
                 time.sleep(0.5)
                 btn.click()
@@ -143,23 +135,18 @@ def click_exact_edit_client():
     try:
         print("در حال پیدا کردن رکورد دقیق '{}' و کلیک روی دکمه 'Edit Client' مربوط به آن...".format(CLIENT_NAME))
         
-        # انتظار تا حضور تمام ردیف‌های جدول (ant-table-row) فراهم شود
         rows = WebDriverWait(browser, 10).until(
             EC.presence_of_all_elements_located((By.XPATH, "//tr[contains(@class, 'ant-table-row')]"))
         )
         
         for row in rows:
             try:
-                # جستجو برای سلولی که متن دقیقی برابر با CLIENT_NAME داشته باشد
                 cell = row.find_element(By.XPATH, ".//td[normalize-space(text())='{}']".format(CLIENT_NAME))
                 if cell:
-                    # یافتن دکمه Edit Client در داخل همان ردیف
                     edit_btn = row.find_element(
                         By.XPATH, ".//i[contains(@class, 'normal-icon') and contains(@class, 'anticon-edit')]"
                     )
-                    # اسکرول به سمت دکمه جهت اطمینان از قابل مشاهده بودن
                     browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
-                    # کلیک روی دکمه با استفاده از جاوااسکریپت
                     browser.execute_script("arguments[0].click();", edit_btn)
                     print("دکمه 'Edit Client' مربوط به رکورد دقیق '{}' کلیک شد.".format(CLIENT_NAME))
                     return
