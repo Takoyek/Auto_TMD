@@ -13,11 +13,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 # متغیرهای سراسری
-CLIENT_NAME = "نسیم.اقدام.a12"
-TOTAL_FLOW  = "71"
-DURATION    = "91"
+CLIENT_NAME = "Nadia-New"
+TOTAL_FLOW  = "999"
+DURATION    = "888"
 WAIT_TIME   = 1
-BASE_URL    = "http://37.27.253.117:2095"
+BASE_URL    = "http://tmd.taino.top:2095/"
 
 def take_full_page_screenshot(browser, save_path):
     print("در حال تغییر سطح zoom صفحه به 50%...")
@@ -33,81 +33,133 @@ def take_full_page_screenshot(browser, save_path):
     print("تصویر نهایی با ابعاد 1080x720 ذخیره شد.")
 
 def login_to_panel(username, password):
-    print("در حال ورود به پنل...")
-    browser.get(BASE_URL)
-    time.sleep(WAIT_TIME)
-    print("در حال یافتن فیلدهای نام کاربری و رمز عبور...")
-    username_field = browser.find_element(By.NAME, 'username')
-    password_field = browser.find_element(By.NAME, 'password')
-    username_field.send_keys(username)
-    password_field.send_keys(password)
-    password_field.send_keys(Keys.RETURN)
-    time.sleep(WAIT_TIME + 1)
-    print("ورود به پنل انجام شد. آدرس فعلی:", browser.current_url)
+    try:
+        print("در حال ورود به پنل...")
+        browser.get(BASE_URL)
+        
+        # انتظار تا فیلد نام کاربری قابل دسترس شود؛ 
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.NAME, "username"))
+        )
+        
+        print("در حال یافتن فیلدهای نام کاربری و رمز عبور...")
+        username_field = browser.find_element(By.NAME, 'username')
+        password_field = browser.find_element(By.NAME, 'password')
+        
+        username_field.clear()
+        password_field.clear()
+        username_field.send_keys(username)
+        password_field.send_keys(password)
+        password_field.send_keys(Keys.RETURN)
+        
+        # انتظار برای تغییر صفحه؛ به جای time.sleep از شرطی استفاده می‌کنیم که بررسی کند صفحه به پنل منتقل شده است
+        WebDriverWait(browser, 10).until(lambda driver: "panel" in driver.current_url.lower())
+        
+        if "login" in browser.current_url.lower():
+            raise Exception("ورود با خطا مواجه شد.")  
+        print("ورود به پنل انجام شد. آدرس فعلی:", browser.current_url)
+    except Exception as e:
+        print("خطا در ورود به پنل:", e)
+        error_screenshot = os.path.join("/root/Screen/", "login_error.png")
+        take_full_page_screenshot(browser, error_screenshot)
+        print("اسکرین‌شات خطا در ورود به پنل ذخیره شد در:", error_screenshot)
+
 
 def click_inbounds():
-    print("در حال جستجوی دکمه 'Inbounds'...")
+    print("در حال جستجوی دکمه 'Inbounds' با استفاده از XPath نسبی...")
     try:
-        inbound_element = browser.find_element(By.XPATH, "//b[text()='Inbounds']")
-        try:
-            inbound_button = inbound_element.find_element(By.XPATH, "./..")
-            print("دکمه Inbounds پیدا شد. در حال کلیک روی آن...")
-            inbound_button.click()
-        except Exception:
-            print("مشکل در دریافت دکمه والد. تلاش برای کلیک مستقیم روی عنصر...")
-            inbound_element.click()
+        # استفاده از WebDriverWait برای اطمینان از قابل کلیک بودن دکمه Inbounds
+        inbound_button = WebDriverWait(browser, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//b[text()='Inbounds']/.."))
+        )
+        print("دکمه Inbounds پیدا شد. در حال اسکرول به سمت آن...")
+        browser.execute_script("arguments[0].scrollIntoView(true);", inbound_button)
+        print("در حال کلیک روی دکمه Inbounds...")
+        inbound_button.click()
     except Exception as e:
-        print("خطا در یافتن دکمه Inbounds:", e)
+        print("خطا در یافتن یا کلیک روی دکمه 'Inbounds':", e)
     time.sleep(WAIT_TIME + 1)
     print("پس از کلیک، آدرس فعلی:", browser.current_url)
+
 
 def search_client_and_capture(client_name):
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
-        search_input = browser.find_element(By.XPATH, "//input[@placeholder='Search']")
+        search_input = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Search']"))
+        )
     except Exception as e:
         print("خطا در یافتن فیلد جستجو:", e)
         return
+
+    # اطمینان از دیده شدن المان
+    browser.execute_script("arguments[0].scrollIntoView(true);", search_input)
+    
     search_input.clear()
     search_input.send_keys(client_name)
     search_input.send_keys(Keys.RETURN)
     print(f"نام کلاینت '{client_name}' ارسال شد. در حال جستجو...")
-    time.sleep(WAIT_TIME + 1)
-    full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
-    take_full_page_screenshot(browser, full_search_screenshot)
-    print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+    
+    time.sleep(WAIT_TIME)
+    # در صورت نیاز می‌توانید اسکرین‌شات نتایج را نیز ذخیره کنید:
+    # full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
+    # take_full_page_screenshot(browser, full_search_screenshot)
+    # print("اسکرین‌شات کامل نتایج جستجو ذخیره شد در:", full_search_screenshot)
+
+
 
 def expand_all_inbound_rows():
     print("در حال باز کردن زیرمجموعه‌های اینباند (Expand row)...")
     try:
-        expand_buttons = browser.find_elements(
-            By.XPATH, "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
+        # انتظار برای حضور تمام دکمه‌های Expand
+        expand_buttons = WebDriverWait(browser, 10).until(
+            EC.presence_of_all_elements_located((
+                By.XPATH, 
+                "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
+            ))
         )
         print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
+        
+        # تکرار برای کلیک روی هر دکمه
         for btn in expand_buttons:
             try:
+                # اسکرول کردن به سمت دکمه
                 browser.execute_script("arguments[0].scrollIntoView(true);", btn)
                 time.sleep(0.5)
                 btn.click()
             except Exception as ex:
-                print("خطا در کلیک روی دکمه Expand: ", ex)
-            time.sleep(1)
+                print("خطا در کلیک روی دکمه Expand:", ex)
+            time.sleep(1)  # وقفه بین کلیک‌ها
         print("تمامی زیرمجموعه‌های اینباند باز شدند.")
     except Exception as e:
         print("خطا در باز کردن زیرمجموعه‌های اینباند:", e)
+    
     full_screenshot_path = os.path.join("/root/Screen/", "inbounds_page_full_stitched.png")
     take_full_page_screenshot(browser, full_screenshot_path)
     print("اسکرین‌شات کامل باز کردن زیرمجموعه‌های اینباند ذخیره شد در:", full_screenshot_path)
 
+
 def click_exact_edit_client():
     try:
         print("در حال پیدا کردن رکورد دقیق '{}' و کلیک روی دکمه 'Edit Client' مربوط به آن...".format(CLIENT_NAME))
-        rows = browser.find_elements(By.XPATH, "//tr[contains(@class, 'ant-table-row')]")
+        
+        # انتظار تا حضور تمام ردیف‌های جدول (ant-table-row) فراهم شود
+        rows = WebDriverWait(browser, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, "//tr[contains(@class, 'ant-table-row')]"))
+        )
+        
         for row in rows:
             try:
+                # جستجو برای سلولی که متن دقیقی برابر با CLIENT_NAME داشته باشد
                 cell = row.find_element(By.XPATH, ".//td[normalize-space(text())='{}']".format(CLIENT_NAME))
                 if cell:
-                    edit_btn = row.find_element(By.CSS_SELECTOR, "i.normal-icon.anticon.anticon-edit")
+                    # یافتن دکمه Edit Client در داخل همان ردیف
+                    edit_btn = row.find_element(
+                        By.XPATH, ".//i[contains(@class, 'normal-icon') and contains(@class, 'anticon-edit')]"
+                    )
+                    # اسکرول به سمت دکمه جهت اطمینان از قابل مشاهده بودن
+                    browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
+                    # کلیک روی دکمه با استفاده از جاوااسکریپت
                     browser.execute_script("arguments[0].click();", edit_btn)
                     print("دکمه 'Edit Client' مربوط به رکورد دقیق '{}' کلیک شد.".format(CLIENT_NAME))
                     return
@@ -117,9 +169,10 @@ def click_exact_edit_client():
     except Exception as e:
         print("خطا در انتخاب دقیق '{}' و کلیک روی Edit Client:".format(CLIENT_NAME), e)
 
+
 def edit_total_flow_value(new_value):
     try:
-        print("در حال یافتن فیلد 'Total Flow' با استفاده از XPath نسبی...")
+        print("در حال یافتن فیلد 'Total Flow' ")
         total_flow_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -151,9 +204,9 @@ def click_reset_traffic():
         browser.execute_script("arguments[0].click();", reset_button)
         print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
         time.sleep(WAIT_TIME)
-        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
-        take_full_page_screenshot(browser, reset_screenshot_path)
-        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
+#        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
+#        take_full_page_screenshot(browser, reset_screenshot_path)
+#        print("اسکرین‌شات نتیجه 'Reset Traffic' در مسیر ذخیره شد:", reset_screenshot_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
         error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
@@ -171,14 +224,11 @@ def click_reset_confirmation_and_capture():
         print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
         ActionChains(browser).send_keys(Keys.ENTER).perform()
         time.sleep(WAIT_TIME)
-        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
-        take_full_page_screenshot(browser, confirm_screenshot_path)
-        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
+#        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
+#        take_full_page_screenshot(browser, confirm_screenshot_path)
+#        print("اسکرین‌شات نتیجه تایید Reset Traffic در مسیر ذخیره شد:", confirm_screenshot_path)
     except Exception as e:
         print("خطا در عملیات تایید Reset Traffic:", e)
-        error_screenshot = os.path.join("/root/Screen/", "reset_confirm_error.png")
-        take_full_page_screenshot(browser, error_screenshot)
-        print("اسکرین‌شات خطا در عملیات تایید Reset Traffic در مسیر ذخیره شد:", error_screenshot)
 
 
 # ------------------  پارت دوم  ------------------
@@ -186,24 +236,39 @@ def click_reset_confirmation_and_capture():
 def edit_client_window_and_capture():
     try:
         print("در حال انتظار برای بارگذاری کامل پنجره 'Edit Client'...")
-        time.sleep(WAIT_TIME + 1)
+        # انتظار تا زمانی که پنجره 'Edit Client' به صورت کامل بارگذاری و قابل مشاهده شود.
+        WebDriverWait(browser, WAIT_TIME).until(
+            EC.visibility_of_element_located((By.ID, "client-modal"))
+        )
+        # در صورت نیاز می‌توانید کمی زمان اضافه کنید تا انیمیشن‌ها هم به پایان برسند.
+        time.sleep(1)
+        
         before_path = os.path.join("/root/Screen/", "edit_client_before.png")
         take_full_page_screenshot(browser, before_path)
         print("اسکرین‌شات قبل از تغییرات ذخیره شد:", before_path)
+        
         print("در حال تغییر مقدار 'Total Flow'...")
         edit_total_flow_value(TOTAL_FLOW)
-        time.sleep(WAIT_TIME)
+        
+        # اطمینان از آماده شدن صفحه پس از تغییر مقدار
+        WebDriverWait(browser, WAIT_TIME).until(
+            lambda driver: driver.execute_script("return document.readyState") == "complete"
+        )
+        
         click_reset_traffic()
         click_reset_confirmation_and_capture()
-        after_path = os.path.join("/root/Screen/", "edit_client_after.png")
-        take_full_page_screenshot(browser, after_path)
-        print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
+        
+        # در صورت نیاز می‌توانید اسکرین‌شاتی از وضعیت نهایی نیز بگیرید.
+        # after_path = os.path.join("/root/Screen/", "edit_client_after.png")
+        # take_full_page_screenshot(browser, after_path)
+        # print("اسکرین‌شات بعد از تغییرات ذخیره شد:", after_path)
     except Exception as e:
         print("خطا در عملیات ویرایش پنجره 'Edit Client':", e)
 
+
 def toggle_start_after_first_use_and_capture():
     try:
-        print("در حال یافتن دکمه 'Start After First Use' با استفاده از XPath نسبی...")
+        print("در حال یافتن دکمه 'Start After First Use' ")
         btn = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -225,9 +290,9 @@ def toggle_start_after_first_use_and_capture():
             time.sleep(WAIT_TIME)
         else:
             print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
-        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
-        take_full_page_screenshot(browser, screenshot_path)
-        print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
+#        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
+#        take_full_page_screenshot(browser, screenshot_path)
+#        print("اسکرین‌شات وضعیت به‌روز شده دکمه 'Start After First Use' در مسیر ذخیره شد:", screenshot_path)
     except Exception as e:
         print("خطا در عملیات تغییر وضعیت دکمه 'Start After First Use':", e)
 
@@ -235,7 +300,7 @@ def update_duration_field_by_selector(new_value=None):
     if new_value is None:
         new_value = DURATION
     try:
-        print("در حال یافتن فیلد 'Duration' با استفاده از XPath نسبی...")
+        print("در حال یافتن فیلد 'Duration' ")
         duration_input = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -249,8 +314,14 @@ def update_duration_field_by_selector(new_value=None):
         time.sleep(0.5)
         duration_input.send_keys(new_value)
         print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
+        
+        # گرفتن اسکرین‌شات پس از به‌روزرسانی فیلد Duration
+        screenshot_path = os.path.join("/root/Screen/", "duration_updated.png")
+        take_full_page_screenshot(browser, screenshot_path)
+        print("اسکرین‌شات از فیلد Duration به‌روز شده در مسیر ذخیره شد:", screenshot_path)
     except Exception as e:
         print("خطا در به‌روز کردن فیلد 'Duration':", e)
+
 
 def save_changes_and_capture():
     try:
