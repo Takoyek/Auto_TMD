@@ -3,6 +3,7 @@ import shutil
 import math
 import time
 from PIL import Image
+from io import BytesIO
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -12,22 +13,28 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 CLIENT_NAME = "Nadia-New"
 TOTAL_FLOW  = "666"
 DURATION    = "777"
 WAIT_TIME   = 1
 BASE_URL    = "http://tmd.taino.top:2095/"
 
+
 def take_full_page_screenshot(browser, save_path):
-    browser.save_screenshot(save_path)
-    print("اسکرین‌شات صفحه ذخیره شد:", save_path)
-    final_image = Image.open(save_path)
-    final_image = final_image.resize((1280, 720), Image.LANCZOS)
-    final_image.save(save_path)
+    browser.set_window_size(1920, 1080)
+    screenshot_png = browser.get_screenshot_as_png()
+    original_image = Image.open(BytesIO(screenshot_png))
+    pixel_ratio = browser.execute_script("return window.devicePixelRatio") or 1
+    width, height = original_image.size
+    new_width = int(width * pixel_ratio)
+    new_height = int(height * pixel_ratio)
+    final_image = original_image.resize((new_width, new_height), Image.LANCZOS)
+    final_image.save(save_path, quality=95, optimize=True)
+#    print("اسکرین‌شات با کیفیت بالا ذخیره شد:", save_path)
+
 
 def login_to_panel(username, password):
-    print("Zoom to 50%")
-    browser.execute_script("document.body.style.zoom='50%'")
     try:
         print("در حال ورود به پنل...")
         browser.get(BASE_URL)
@@ -75,8 +82,6 @@ def click_inbounds():
 
 
 def search_client_and_capture(client_name):
-    print("Zoom to 50%")
-    browser.execute_script("document.body.style.zoom='50%'")
     print("در حال یافتن فیلد جستجوی کلاینت با placeholder='Search'...")
     try:
         search_input = WebDriverWait(browser, 5).until(
@@ -329,12 +334,12 @@ def save_changes_and_capture():
 
 # ------------------ Main Program ------------------
 
+start_time = time.time()
 screen_dir = "/root/Screen/"
 if os.path.exists(screen_dir):
     shutil.rmtree(screen_dir)
 os.makedirs(screen_dir)
 print("محتویات فایل Screen حذف شد.")
-
 print("در حال راه‌اندازی مرورگر...")
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
@@ -343,7 +348,6 @@ options.add_argument('--disable-dev-shm-usage')
 service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 print("مرورگر راه‌اندازی شد.")
-
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(WAIT_TIME)
@@ -363,3 +367,6 @@ save_changes_and_capture()
 print("عملیات تمدید اشتراک کاربر با موفقیت انجام شد.")
 browser.quit()
 print("مرورگر بسته شد.")
+end_time = time.time()  # زمان پایان
+elapsed = end_time - start_time
+print("زمان اجرای کل برنامه: {:.2f} ثانیه".format(elapsed))
