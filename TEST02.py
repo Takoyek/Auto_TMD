@@ -5,6 +5,7 @@ import time
 from PIL import Image
 from io import BytesIO
 from selenium import webdriver
+from colorama import Fore, Style
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -51,7 +52,7 @@ def login_to_panel(username, password):
         
         if "login" in browser.current_url.lower():
             raise Exception("ورود با خطا مواجه شد.")  
-        print("ورود به پنل انجام شد. آدرس فعلی:\n\n", browser.current_url)
+        print("ورود به پنل انجام شد. آدرس فعلی:\n\n", Fore.YELLOW + browser.current_url + Style.RESET_ALL)
     except Exception as e:
         print("خطا در ورود به پنل:", e)
         error_screenshot = os.path.join("/root/Screen/", "login_error.png")
@@ -67,8 +68,11 @@ def click_inbounds():
         inbound_button.click()
     except Exception as e:
         print("خطا در یافتن یا کلیک روی دکمه 'Inbounds':", e)
-    time.sleep(WAIT_TIME + 1)
-    print("\nپس از کلیک روی دکمه Inbounds، آدرس فعلی:\n\n", browser.current_url)
+    time.sleep(WAIT_TIME)
+    blue_text = Fore.BLUE + 'Inbounds' + Style.RESET_ALL
+    yellow_url = Fore.YELLOW + browser.current_url + Style.RESET_ALL
+    print("\nپس از کلیک روی دکمه {}، آدرس فعلی:\n\n".format(blue_text) + yellow_url)
+
 
 
 def search_client_and_capture(CLIENT_NAME):
@@ -132,7 +136,10 @@ def click_exact_edit_client():
                     )
                     browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
                     browser.execute_script("arguments[0].click();", edit_btn)
-                    print("دکمه 'Edit Client' مربوط به رکورد '{}' کلیک شد.\n".format(CLIENT_NAME))
+                    blue_text = Fore.BLUE + 'Edit Client' + Style.RESET_ALL
+                    red_text = Fore.RED + CLIENT_NAME + Style.RESET_ALL
+                    print("دکمه {} مربوط به رکورد {} کلیک شد.\n".format(blue_text, red_text))
+
                     return
             except Exception as inner_e:
                 continue
@@ -157,7 +164,9 @@ def edit_total_flow_value(new_value):
         )
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
-        print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.\n")
+        print(f"مقدار فیلد {Fore.BLUE}'Total Flow'{Style.RESET_ALL} "
+        f"به {Fore.RED}{new_value}{Style.RESET_ALL} تغییر یافت.\n")
+
     except Exception as e:
         print("خطا در تغییر مقدار 'Total Flow':", e)
 
@@ -171,11 +180,12 @@ def click_reset_traffic():
             ))
         )
         browser.execute_script("arguments[0].click();", reset_button)
-        print("کلیک روی دکمه 'Reset Traffic' انجام شد.\n")
-        time.sleep(WAIT_TIME)
-#        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
-#        take_full_page_screenshot(browser, reset_screenshot_path)
+        print("کلیک روی دکمه '" + Fore.MAGENTA + "Reset Traffic" + Style.RESET_ALL + "' انجام شد.\n")
+        #time.sleep(WAIT_TIME)
+        #reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
+        #take_full_page_screenshot(browser, reset_screenshot_path)
     except Exception as e:
+        time.sleep(WAIT_TIME)
         print("خطا در عملیات کلیک روی دکمه 'Reset Traffic':", e)
         error_screenshot = os.path.join("/root/Screen/", "reset_traffic_error.png")
         take_full_page_screenshot(browser, error_screenshot)
@@ -188,9 +198,11 @@ def click_reset_confirmation_and_capture():
                 (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
             )
         )
-        print("پنجره تایید 'Reset Traffic' ظاهر شد.\n\nدر حال ارسال کلید 'ENTER' جهت تایید...\n")
+        print("پنجره تایید '" + Fore.MAGENTA + "Reset Traffic" + Style.RESET_ALL + "' ظاهر شد.\n\n"
+        "در حال ارسال کلید '" + Fore.MAGENTA + "ENTER" + Style.RESET_ALL + "' جهت تایید...\n")
+
         ActionChains(browser).send_keys(Keys.ENTER).perform()
-        time.sleep(WAIT_TIME)
+#        time.sleep(WAIT_TIME)
 #        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
 #        take_full_page_screenshot(browser, confirm_screenshot_path)
     except Exception as e:
@@ -243,7 +255,7 @@ def toggle_start_after_first_use_and_capture():
         print("وضعیت اولیه دکمه 'Start After First Use' برابر است با:", state)
         if state.lower() != "true":
             btn.click()
-            time.sleep(WAIT_TIME)
+            #time.sleep(WAIT_TIME)
         else:
             print("\nدکمه نیاز به تغییر ندارد.\n")
 #        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
@@ -316,9 +328,11 @@ edit_client_window_and_capture()
 toggle_start_after_first_use_and_capture()
 update_duration_field_by_selector(DURATION)
 save_changes_and_capture()
-print("عملیات تمدید اشتراک کاربر با موفقیت انجام شد.")
+print(Fore.GREEN + "عملیات تمدید اشتراک کاربر با موفقیت انجام شد." + Style.RESET_ALL)
+print(Fore.MAGENTA + "عملیات تمدید اشتراک کاربر با موفقیت انجام شد." + Style.RESET_ALL)
+
 browser.quit()
 end_time = time.time()
 elapsed = end_time - start_time
-print("\nزمان اجرای کل برنامه: {:.2f} ثانیه".format(elapsed))
+print(Fore.YELLOW + "\nزمان اجرای کل برنامه: {:.2f} ثانیه".format(elapsed) + Style.RESET_ALL)
 print(".\n")
