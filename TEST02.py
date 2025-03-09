@@ -35,15 +35,12 @@ def take_full_page_screenshot(browser, save_path):
 
 def login_to_panel(username, password):
     try:
-        browser.get(BASE_URL)
-        
+        browser.get(BASE_URL)       
         WebDriverWait(browser, 5).until(
             EC.presence_of_element_located((By.NAME, "username"))
-        )
-        
+        )        
         username_field = browser.find_element(By.NAME, 'username')
-        password_field = browser.find_element(By.NAME, 'password')
-        
+        password_field = browser.find_element(By.NAME, 'password')        
         username_field.clear()
         password_field.clear()
         username_field.send_keys(username)
@@ -54,7 +51,7 @@ def login_to_panel(username, password):
         
         if "login" in browser.current_url.lower():
             raise Exception("ورود با خطا مواجه شد.")  
-        print("ورود به پنل انجام شد. آدرس فعلی:", browser.current_url)
+        print("ورود به پنل انجام شد. آدرس فعلی:\n\n", browser.current_url)
     except Exception as e:
         print("خطا در ورود به پنل:", e)
         error_screenshot = os.path.join("/root/Screen/", "login_error.png")
@@ -71,7 +68,7 @@ def click_inbounds():
     except Exception as e:
         print("خطا در یافتن یا کلیک روی دکمه 'Inbounds':", e)
     time.sleep(WAIT_TIME + 1)
-    print("پس از کلیک روی دکمه Inbounds، آدرس فعلی:", browser.current_url)
+    print("\nپس از کلیک روی دکمه Inbounds، آدرس فعلی:\n\n", browser.current_url)
 
 
 def search_client_and_capture(CLIENT_NAME):
@@ -88,7 +85,7 @@ def search_client_and_capture(CLIENT_NAME):
     search_input.clear()
     search_input.send_keys(CLIENT_NAME)
     search_input.send_keys(Keys.RETURN)
-    print(f" در حال جستجو کلاینت: '{CLIENT_NAME}' ")
+    print(f"\n در حال جستجو کلاینت: '{CLIENT_NAME}' \n")
     
     time.sleep(WAIT_TIME)
     # full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
@@ -103,7 +100,7 @@ def expand_all_inbound_rows():
                 "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
             ))
         )
-        print(f"{len(expand_buttons)} دکمه برای باز کردن زیرمجموعه‌ها پیدا شدند.")
+        print(f"{len(expand_buttons)} دکمه برای باز کردن زیر مجموعه‌ ها پیدا شدند.\n")
         
         for btn in expand_buttons:
             try:
@@ -135,7 +132,7 @@ def click_exact_edit_client():
                     )
                     browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
                     browser.execute_script("arguments[0].click();", edit_btn)
-                    print("دکمه 'Edit Client' مربوط به رکورد دقیق '{}' کلیک شد.".format(CLIENT_NAME))
+                    print("دکمه 'Edit Client' مربوط به رکورد '{}' کلیک شد.\n".format(CLIENT_NAME))
                     return
             except Exception as inner_e:
                 continue
@@ -160,7 +157,7 @@ def edit_total_flow_value(new_value):
         )
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
-        print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.")
+        print(f"مقدار فیلد 'Total Flow' به {new_value} تغییر یافت.\n")
     except Exception as e:
         print("خطا در تغییر مقدار 'Total Flow':", e)
 
@@ -174,7 +171,7 @@ def click_reset_traffic():
             ))
         )
         browser.execute_script("arguments[0].click();", reset_button)
-        print("کلیک روی دکمه 'Reset Traffic' انجام شد.")
+        print("کلیک روی دکمه 'Reset Traffic' انجام شد.\n")
         time.sleep(WAIT_TIME)
 #        reset_screenshot_path = os.path.join("/root/Screen/", "reset_traffic_result.png")
 #        take_full_page_screenshot(browser, reset_screenshot_path)
@@ -191,7 +188,7 @@ def click_reset_confirmation_and_capture():
                 (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
             )
         )
-        print("پنجره تایید Reset Traffic ظاهر شد. در حال ارسال کلید ENTER جهت تایید...")
+        print("پنجره تایید 'Reset Traffic' ظاهر شد.\n\nدر حال ارسال کلید 'ENTER' جهت تایید...\n")
         ActionChains(browser).send_keys(Keys.ENTER).perform()
         time.sleep(WAIT_TIME)
 #        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
@@ -212,7 +209,6 @@ def edit_client_window_and_capture():
         before_path = os.path.join("/root/Screen/", "02_edit_client_before.png")
         take_full_page_screenshot(browser, before_path)
         
-        print("در حال تغییر مقدار 'Total Flow'...")
         edit_total_flow_value(TOTAL_FLOW)
         
         WebDriverWait(browser, WAIT_TIME).until(
@@ -249,7 +245,7 @@ def toggle_start_after_first_use_and_capture():
             btn.click()
             time.sleep(WAIT_TIME)
         else:
-            print("دکمه قبلاً فعال است و نیاز به تغییر ندارد.")
+            print("\nدکمه نیاز به تغییر ندارد.\n")
 #        screenshot_path = os.path.join("/root/Screen/", "start_after_updated.png")
 #        take_full_page_screenshot(browser, screenshot_path)
     except Exception as e:
@@ -271,7 +267,7 @@ def update_duration_field_by_selector(new_value=None):
         browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", duration_input)
         time.sleep(0.5)
         duration_input.send_keys(new_value)
-        print(f"مقدار فیلد 'Duration' به {new_value} تغییر یافت.")
+        print(f" فیلد 'Duration' به {new_value} تغییر یافت.\n")
         
         screenshot_path = os.path.join("/root/Screen/", "03_duration.png")
         take_full_page_screenshot(browser, screenshot_path)
@@ -289,7 +285,7 @@ def save_changes_and_capture():
         )
         browser.execute_script("arguments[0].scrollIntoView(true);", save_button)
         browser.execute_script("arguments[0].click();", save_button)
-        print("کلیک روی دکمه 'Save Changes' انجام شد.")
+        print("کلیک روی دکمه 'Save Changes' انجام شد.\n")
         time.sleep(WAIT_TIME + 1)
         final_save_path = os.path.join("/root/Screen/", "04_save_changes.png")
         take_full_page_screenshot(browser, final_save_path)
@@ -309,7 +305,7 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
-print("مرورگر راه‌اندازی شد.")
+print("مرورگر راه‌اندازی شد.\n")
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(WAIT_TIME)
@@ -322,7 +318,7 @@ update_duration_field_by_selector(DURATION)
 save_changes_and_capture()
 print("عملیات تمدید اشتراک کاربر با موفقیت انجام شد.")
 browser.quit()
-print("مرورگر بسته شد.")
 end_time = time.time()
 elapsed = end_time - start_time
-print("زمان اجرای کل برنامه: {:.2f} ثانیه".format(elapsed))
+print("\nزمان اجرای کل برنامه: {:.2f} ثانیه".format(elapsed))
+print(".\n")
