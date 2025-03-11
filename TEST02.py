@@ -2,6 +2,7 @@ import os
 import shutil
 import math
 import time
+import subprocess
 from PIL import Image
 from io import BytesIO
 from selenium import webdriver
@@ -52,7 +53,9 @@ def login_to_panel(username, password):
         
         if "login" in browser.current_url.lower():
             raise Exception("ورود با خطا مواجه شد.")  
-        print("ورود به پنل انجام شد. آدرس فعلی:\n\n", Fore.YELLOW + browser.current_url + Style.RESET_ALL)
+        print(Fore.GREEN + "ورود به پنل انجام شد.\n\n" + Style.RESET_ALL + " آدرس فعلی: \n" + Fore.YELLOW 
+            + str(browser.current_url) + Style.RESET_ALL)
+
     except Exception as e:
         print("خطا در ورود به پنل:", e)
         error_screenshot = os.path.join("/root/Screen/", "login_error.png")
@@ -69,10 +72,8 @@ def click_inbounds():
     except Exception as e:
         print("خطا در یافتن یا کلیک روی دکمه 'Inbounds':", e)
     time.sleep(WAIT_TIME)
-    blue_text = Fore.BLUE + 'Inbounds' + Style.RESET_ALL
-    yellow_url = Fore.YELLOW + browser.current_url + Style.RESET_ALL
-    print("\nپس از کلیک روی دکمه {}، آدرس فعلی:\n\n".format(blue_text) + yellow_url)
-
+    print("کلیک روی دکمه '" + Fore.BLUE + "Inbounds" + Style.RESET_ALL + "' انجام شد.\n")
+    print("آدرس فعلی: \n" + Fore.YELLOW + str(browser.current_url) + Style.RESET_ALL)
 
 
 def search_client_and_capture(CLIENT_NAME):
@@ -89,7 +90,7 @@ def search_client_and_capture(CLIENT_NAME):
     search_input.clear()
     search_input.send_keys(CLIENT_NAME)
     search_input.send_keys(Keys.RETURN)
-    print(f"\n در حال جستجو کلاینت: '{CLIENT_NAME}' \n")
+    print(f"\n در حال جستجو کلاینت: '" + Fore.YELLOW + f"{CLIENT_NAME}" + Style.RESET_ALL + "' \n")
     
     time.sleep(WAIT_TIME)
     # full_search_screenshot = os.path.join("/root/Screen/", "search_result_full.png")
@@ -104,7 +105,7 @@ def expand_all_inbound_rows():
                 "//div[@role='button' and @aria-label='Expand row' and contains(@class, 'ant-table-row-collapsed')]"
             ))
         )
-        print(f"{len(expand_buttons)} دکمه برای باز کردن زیر مجموعه‌ ها پیدا شدند.\n")
+        print(Fore.YELLOW + f"{len(expand_buttons)}" + Style.RESET_ALL + " دکمه برای باز کردن زیر مجموعه‌ ها پیدا شدند.\n")
         
         for btn in expand_buttons:
             try:
@@ -136,9 +137,9 @@ def click_exact_edit_client():
                     )
                     browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
                     browser.execute_script("arguments[0].click();", edit_btn)
-                    blue_text = Fore.BLUE + 'Edit Client' + Style.RESET_ALL
-                    red_text = Fore.RED + CLIENT_NAME + Style.RESET_ALL
-                    print("دکمه {} مربوط به رکورد {} کلیک شد.\n".format(blue_text, red_text))
+                    print("دکمه '" + Fore.BLUE + "Edit Client" + Style.RESET_ALL 
+                        + "' مربوط به رکورد '" + Fore.YELLOW + "{}".format(CLIENT_NAME) + Style.RESET_ALL + "' کلیک شد.\n")
+
 
                     return
             except Exception as inner_e:
@@ -165,7 +166,7 @@ def edit_total_flow_value(new_value):
         time.sleep(0.5)
         total_flow_input.send_keys(new_value)
         print(f"مقدار فیلد {Fore.BLUE}'Total Flow'{Style.RESET_ALL} "
-        f"به {Fore.RED}{new_value}{Style.RESET_ALL} تغییر یافت.\n")
+        f"به {Fore.YELLOW}{new_value}{Style.RESET_ALL} تغییر یافت.\n")
 
     except Exception as e:
         print("خطا در تغییر مقدار 'Total Flow':", e)
@@ -198,10 +199,10 @@ def click_reset_confirmation_and_capture():
                 (By.XPATH, "//div[contains(text(), 'Are you sure you want to reset traffic?')]")
             )
         )
-        print("پنجره تایید '" + Fore.MAGENTA + "Reset Traffic" + Style.RESET_ALL + "' ظاهر شد.\n\n"
-        "در حال ارسال کلید '" + Fore.MAGENTA + "ENTER" + Style.RESET_ALL + "' جهت تایید...\n")
-
+        print("پنجره تایید '" + Fore.MAGENTA + "Reset Traffic" + Style.RESET_ALL + "' ظاهر شد.\n")
         ActionChains(browser).send_keys(Keys.ENTER).perform()
+        print("کلید '" + Fore.MAGENTA + "ENTER" + Style.RESET_ALL + "' ارسال شد.\n")
+
 #        time.sleep(WAIT_TIME)
 #        confirm_screenshot_path = os.path.join("/root/Screen/", "reset_confirm_result.png")
 #        take_full_page_screenshot(browser, confirm_screenshot_path)
@@ -279,7 +280,8 @@ def update_duration_field_by_selector(new_value=None):
         browser.execute_script("arguments[0].value=''; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", duration_input)
         time.sleep(0.5)
         duration_input.send_keys(new_value)
-        print(f" فیلد 'Duration' به {new_value} تغییر یافت.\n")
+        print(f"\n فیلد '" + Fore.MAGENTA + "Duration" + Style.RESET_ALL 
+            + "' به " + Fore.YELLOW + f"{new_value}" + Style.RESET_ALL + " تغییر یافت.\n")
         
         screenshot_path = os.path.join("/root/Screen/", "03_duration.png")
         take_full_page_screenshot(browser, screenshot_path)
@@ -297,12 +299,13 @@ def save_changes_and_capture():
         )
         browser.execute_script("arguments[0].scrollIntoView(true);", save_button)
         browser.execute_script("arguments[0].click();", save_button)
-        print("کلیک روی دکمه 'Save Changes' انجام شد.\n")
+        print("کلیک روی دکمه '" + Fore.MAGENTA + "Save Changes" + Style.RESET_ALL + "' انجام شد.\n")
         time.sleep(WAIT_TIME + 1)
         final_save_path = os.path.join("/root/Screen/", "04_save_changes.png")
         take_full_page_screenshot(browser, final_save_path)
     except Exception as e:
         print("خطا در عملیات کلیک روی دکمه 'Save Changes' یا گرفتن اسکرین‌شات:", e)
+
 
 # ------------------ Main Program ------------------
 
@@ -317,7 +320,7 @@ options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 service = Service(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
-print("مرورگر راه‌اندازی شد.\n")
+print(Fore.GREEN + "\nمرورگر راه‌اندازی شد." + Style.RESET_ALL + "\n")
 login_to_panel('msi', 'msi')
 click_inbounds()
 time.sleep(WAIT_TIME)
@@ -329,9 +332,9 @@ toggle_start_after_first_use_and_capture()
 update_duration_field_by_selector(DURATION)
 save_changes_and_capture()
 print(Fore.GREEN + "عملیات تمدید اشتراک کاربر با موفقیت انجام شد." + Style.RESET_ALL)
-print(Fore.MAGENTA + "عملیات تمدید اشتراک کاربر با موفقیت انجام شد." + Style.RESET_ALL)
-
 browser.quit()
+subprocess.call("pkill -f chrome", shell=True)
+print(Fore.LIGHTRED_EX + "\nمرورگر بسته شد." + Style.RESET_ALL)
 end_time = time.time()
 elapsed = end_time - start_time
 print(Fore.YELLOW + "\nزمان اجرای کل برنامه: {:.2f} ثانیه".format(elapsed) + Style.RESET_ALL)
