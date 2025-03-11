@@ -1,21 +1,15 @@
 from telethon import TelegramClient, events
 import sqlite3
 import asyncio
+import subprocess
 
 # تنظیمات تلگرام
 api_id = 29646851
 api_hash = '70a40f9db30071a7be02eb35fef561b6'
 phone_number = '+989155841124'
-
-# لیست block_reply
-block_reply = [
-    101512739, 1622957174, 133450983, 1499394623,
-    736768510, 93983470, 725484841, 58107887, 349942915
-]
-
 client = TelegramClient('session_name', api_id, api_hash)
 
-# ایجاد و اتصال به پایگاه داده SQLite
+# اتصال به پایگاه داده SQLite و ایجاد جدول در صورت عدم وجود
 conn = sqlite3.connect("inputs.db")
 cursor = conn.cursor()
 cursor.execute("""
@@ -28,9 +22,20 @@ cursor.execute("""
 """)
 conn.commit()
 
+async def wait_for_confirmation(from_id):
+    confirmation_future = asyncio.Future()
+
+    async def confirmation_handler(event):
+        confirmation_future.set_result(event.raw_text.strip())
+        client.remove_event_handler(confirmation_handler)  # حذف handler پس از دریافت پیام
+
+    client.add_event_handler(confirmation_handler, events.NewMessage(incoming=True, from_users=from_id))
+    result = await confirmation_future
+    return result
+
 @client.on(events.NewMessage(incoming=True))
 async def handler(event):
-    # فقط به پیام‌هایی که از آیدی 6312958530 ارسال شده‌اند پاسخ می‌دهد
+    # فقط پیام‌های خصوصی از آیدی 6312958530 پاسخ داده می‌شود
     if not event.is_private or event.sender_id != 6312958530:
         return
 
@@ -40,6 +45,7 @@ async def handler(event):
 
     try:
         text = event.raw_text.strip()
+        # انتظار داریم پیام به فرمت: client_name/ total_flow/ duration باشد.
         parts = text.split('/')
         if len(parts) == 3:
             client_name_input = parts[0].strip()
@@ -48,10 +54,16 @@ async def handler(event):
             cursor.execute("INSERT INTO inputs (client_name, total_flow, duration) VALUES (?, ?, ?)",
                            (client_name_input, total_flow_input, duration_input))
             conn.commit()
-            await event.reply("اطلاعات دریافت و ذخیره شد.")
+            await event.reply("اطلاعات دریافت و ذخیره شد.\nلطفاً تایید کنید: آیا اطلاعات صحیح هستند؟ (بله/خیر)")
+            confirmation = await wait_for_confirmation(event.sender_id)
+            if confirmation.lower() in ["بله", "yes"]:
+                await event.reply("تایید شد. در حال اجرای فایل extend_subscription.py")
+                subprocess.call("/root/myenv/bin/python3 extend_subscription.py", shell=True)
+            else:
+                await event.reply("اطلاعات تایید نشد. لطفاً دوباره ارسال کنید.")
             await client.disconnect()
         else:
-            await event.reply("فرمت پیام نادرست است. لطفاً به صورت: client_name, total_flow, duration ارسال کنید.")
+            await event.reply("فرمت پیام نادرست است. لطفاً به صورت: client_name/ total_flow/ duration ارسال کنید.")
     except Exception as e:
         await event.reply("خطا در پردازش پیام: " + str(e))
 
