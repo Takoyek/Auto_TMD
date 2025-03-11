@@ -7,16 +7,15 @@ api_id = 29646851
 api_hash = '70a40f9db30071a7be02eb35fef561b6'
 phone_number = '+989155841124'
 
-# ایجاد کلاینت تلگرام
-client = TelegramClient('session_name', api_id, api_hash)
-
 # لیست block_reply
 block_reply = [
     101512739, 1622957174, 133450983, 1499394623,
     736768510, 93983470, 725484841, 58107887, 349942915
 ]
 
-# تنظیم پایگاه داده SQLite
+client = TelegramClient('session_name', api_id, api_hash)
+
+# ایجاد و اتصال به پایگاه داده SQLite
 conn = sqlite3.connect("inputs.db")
 cursor = conn.cursor()
 cursor.execute("""
@@ -31,16 +30,17 @@ conn.commit()
 
 @client.on(events.NewMessage(incoming=True))
 async def handler(event):
-    # شرایط مورد نظر: پیام باید خصوصی باشد، فرستنده نباید در block_reply باشد و ربات نباشد.
-    if not event.is_private or event.sender_id in block_reply:
+    # فقط به پیام‌هایی که از آیدی 6312958530 ارسال شده‌اند پاسخ می‌دهد
+    if not event.is_private or event.sender_id != 6312958530:
         return
+
     sender = await event.get_sender()
     if sender and sender.bot:
         return
 
     try:
         text = event.raw_text.strip()
-        parts = text.split(',')
+        parts = text.split('/')
         if len(parts) == 3:
             client_name_input = parts[0].strip()
             total_flow_input = parts[1].strip()
