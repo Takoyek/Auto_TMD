@@ -16,7 +16,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-CLIENT_NAME = "Nadia-New"
+CLIENT_NAME = "3a082828-151c-4d37-9799-6f4f98dc2be2"
 TOTAL_FLOW  = "666"
 DURATION    = "777"
 WAIT_TIME   = 1
@@ -123,28 +123,47 @@ def expand_all_inbound_rows():
 
 
 def click_exact_edit_client():
-    try:        
+    try:
         rows = WebDriverWait(browser, 5).until(
             EC.presence_of_all_elements_located((By.XPATH, "//tr[contains(@class, 'ant-table-row')]"))
         )
-        
-        for row in rows:
-            try:
-                cell = row.find_element(By.XPATH, ".//td[normalize-space(text())='{}']".format(CLIENT_NAME))
-                if cell:
+
+        # اگر تعداد کاراکترهای CLIENT_NAME برابر با 36 باشد، اولین کلاینت پیدا شده انتخاب می‌شود
+        if len(CLIENT_NAME) == 36:
+            for row in rows:
+                try:
                     edit_btn = row.find_element(
                         By.XPATH, ".//i[contains(@class, 'normal-icon') and contains(@class, 'anticon-edit')]"
                     )
                     browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
                     browser.execute_script("arguments[0].click();", edit_btn)
-                    print("دکمه '" + Fore.BLUE + "Edit Client" + Style.RESET_ALL 
-                        + "' مربوط به رکورد '" + Fore.YELLOW + "{}".format(CLIENT_NAME) + Style.RESET_ALL + "' کلیک شد.\n")
-
-
+                    print("دکمه '" + Fore.BLUE + "Edit Client" + Style.RESET_ALL +
+                          "' مربوط به رکورد '" + Fore.YELLOW + CLIENT_NAME + Style.RESET_ALL + "' کلیک شد.\n")
                     return
-            except Exception as inner_e:
-                continue
-        print("ردیف دقیق '{}' پیدا نشد!".format(CLIENT_NAME))
+                except Exception:
+                    continue
+            print("هیچ کلاینتی برای ویرایش یافت نشد!")
+        else:
+            # تبدیل CLIENT_NAME به حروف کوچک برای مقایسه
+            lower_client = CLIENT_NAME.lower()
+            for row in rows:
+                try:
+                    # استفاده از تابع translate در XPath برای تبدیل متن سلول به حروف کوچک
+                    cell = row.find_element(
+                        By.XPATH, ".//td[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='{}']".format(lower_client)
+                    )
+                    if cell:
+                        edit_btn = row.find_element(
+                            By.XPATH, ".//i[contains(@class, 'normal-icon') and contains(@class, 'anticon-edit')]"
+                        )
+                        browser.execute_script("arguments[0].scrollIntoView(true);", edit_btn)
+                        browser.execute_script("arguments[0].click();", edit_btn)
+                        print("دکمه '" + Fore.BLUE + "Edit Client" + Style.RESET_ALL +
+                              "' مربوط به رکورد '" + Fore.YELLOW + CLIENT_NAME + Style.RESET_ALL + "' کلیک شد.\n")
+                        return
+                except Exception:
+                    continue
+            print("ردیف دقیق '{}' پیدا نشد!".format(CLIENT_NAME))
     except Exception as e:
         print("خطا در انتخاب دقیق '{}' و کلیک روی Edit Client:".format(CLIENT_NAME), e)
 
